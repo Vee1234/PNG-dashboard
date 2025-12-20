@@ -44,7 +44,7 @@ class DataLoader:
     def orchestrate_data_scraping(self, df: pd.DataFrame) -> list:
         results_list = []
         for row in df.itertuples():
-            result = {"language_name": None,
+            result = {"language": None,
             "speaker_number_raw": None,
             "speaker_number_numeric": None,
             "speaker_number_type": None,
@@ -53,14 +53,20 @@ class DataLoader:
             "speaker_source": None,
             "speaker_confidence": None,
             "speaker_method": None,
-            "speaker_url": None,
-        }
+            "speaker_url": []}
         
             for link in row.links:
-                print(link['url'])
+                url = link['url']
+                result["language"] = row.language
+                if 'endangeredlanguages.com' in url:
+                    result["speaker_url"].append(url)
+                    result["speaker_number_raw"] = self.scrape_data_from_website(url, "speaker-number-value")
+                    results_list.append(result)
+        return results_list
+                    
                 
         
-    def scrape_data_from_website(self, url: str, html_class_field: str, results_list: list) -> dict:
+    def scrape_data_from_website(self, url: str, html_class_field: str) -> dict:
         # Simulate web scraping (placeholder)
         
         CACHE_DIR = Path("cache")
@@ -73,11 +79,9 @@ class DataLoader:
         label = soup.find("div", class_=html_class_field)
         
         if not label:
-            return result
+            return None
         speaker_number_raw = label.text.strip()
-        result["speaker_number_raw"] = speaker_number_raw
-        results_list.append(result)
 
-        return result
+        return speaker_number_raw
 
         

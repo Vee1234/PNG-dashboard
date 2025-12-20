@@ -28,7 +28,9 @@ def main():
     df = processor.replace_expression_in_values_in_column(df,'language', ' (Papua New Guinea)')
     df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
     
-    #df = processor.replace_expression_in_values_in_column(df['links'],'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
+    results = data_loader.orchestrate_data_scraping(df)
+    print(results)
+    
 
     
     '''map = visualiser.create_map(df, location= analyser.mean_coordinates(df), zoom_start=6)
