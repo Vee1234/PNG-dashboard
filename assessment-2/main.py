@@ -11,19 +11,26 @@ def main():
     
     language_location_data = data_loader.load_data_from_json("data/PNG_all_languages_coordinate_data.geojson")
     df = processor.convert_json_to_df(language_location_data, 'features')
+  
     columns_mapping = {
         'properties.language.id': 'language_ID',
         'properties.language.name': 'language',
         'properties.language.latitude': 'latitude',
-        'properties.language.longitude': 'longitude'
+        'properties.language.longitude': 'longitude',
+        'properties.language.jsondata.links': 'links',
     }
     df = processor.rename_columns(df, columns_mapping)
-    selected_columns = ['language_ID', 'language', 'latitude', 'longitude']
+    selected_columns = ['language_ID', 'language', 'latitude', 'longitude', 'links']
     df = processor.create_new_dataframe_with_selected_columns(df, selected_columns)
     df = processor.remove_data(df, 'language', 'Bilua')
-    df = processor.remove_expression_from_values_in_column(df, 'language', ' (Papua New Guinea)')
-    results = data_loader.scrape_data_from_website("https://www.endangeredlanguages.com/elp-language/10608")
-    print(results)
+    df = processor.remove_data(df, 'language', 'Touo')
+    
+    df = processor.replace_expression_in_values_in_column(df,'language', ' (Papua New Guinea)')
+    df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
+    
+    #df = processor.replace_expression_in_values_in_column(df['links'],'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
+
+    
     '''map = visualiser.create_map(df, location= analyser.mean_coordinates(df), zoom_start=6)
     visualiser.add_points_to_map(df, map)
     vor_web = analyser.create_voronoi_chloropleth(df)

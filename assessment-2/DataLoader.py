@@ -41,19 +41,10 @@ class DataLoader:
       
 
 
-
-
-    def scrape_data_from_website(self, url: str) -> dict:
-        # Simulate web scraping (placeholder)
-        
-        CACHE_DIR = Path("cache")
-        CACHE_DIR.mkdir(exist_ok=True)
-        self.cache_path(url)
-
-        html = self.get_page(url)
-        soup = BeautifulSoup(html, 'html.parser')
-        label = soup.find("div", class_="speaker-number-value")
-        results = {"language_id": None,
+    def orchestrate_data_scraping(self, df: pd.DataFrame) -> list:
+        results_list = []
+        for row in df.itertuples():
+            result = {"language_name": None,
             "speaker_number_raw": None,
             "speaker_number_numeric": None,
             "speaker_number_type": None,
@@ -64,11 +55,29 @@ class DataLoader:
             "speaker_method": None,
             "speaker_url": None,
         }
-        if not label:
-            return results
-        speaker_number_raw = label.text.strip()
-        results["speaker_number_raw"] = speaker_number_raw
+        
+            for link in row.links:
+                print(link['url'])
+                
+        
+    def scrape_data_from_website(self, url: str, html_class_field: str, results_list: list) -> dict:
+        # Simulate web scraping (placeholder)
+        
+        CACHE_DIR = Path("cache")
+        CACHE_DIR.mkdir(exist_ok=True)
+        self.cache_path(url)
 
-        return results
+
+        html = self.get_page(url)
+        soup = BeautifulSoup(html, 'html.parser')
+        label = soup.find("div", class_=html_class_field)
+        
+        if not label:
+            return result
+        speaker_number_raw = label.text.strip()
+        result["speaker_number_raw"] = speaker_number_raw
+        results_list.append(result)
+
+        return result
 
         

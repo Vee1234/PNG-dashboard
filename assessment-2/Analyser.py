@@ -32,8 +32,6 @@ class Analyser:
                 polygons.append(polygon)
         print(f'length of polygons: {len(polygons)}')
         print(f'length of projected_gdf: {len(projected_gdf)}')
-        print(f'length of geometry: {len(geometry)}')
-        print(f'length of vor.regions: {len(vor.regions)}')
         voronoi_gdf = gpd.GeoDataFrame(data= projected_gdf, geometry=polygons, crs=projected_gdf.crs)
         voronoi_gdf = voronoi_gdf[voronoi_gdf.geometry.notnull()]
         return voronoi_gdf

@@ -33,10 +33,19 @@ class Processor:
     def convert_geojson_to_gpd(self, df: pd.DataFrame):
         gdf = gpd.read_file("PNG_all_languages_coordinate_data.geojson")
         print(gdf)
+    
+    def replace_url_in_values_in_column(self, df: pd.DataFrame, expression: str, to_be_replaced: str = '') -> pd.DataFrame:
+        for link_list in df['links']:
+            for link in link_list:
+                print(link['url'])
+                link['url'] = link['url'].replace(expression, to_be_replaced)
+                print(link['url'])
+            
+       
 
-    def remove_expression_from_values_in_column(self, df: pd.DataFrame, column_name: str, expression: str) -> pd.DataFrame:
+    def replace_expression_in_values_in_column(self, df: pd.DataFrame, column, expression: str, to_be_replaced: str = '') -> pd.DataFrame:
         '''This function removes a specific expression from all values in a specified column of the dataframe.'''
-        df[column_name]= df[column_name].str.replace(expression, '')     
+        df[column]= df[column].str.replace(expression, to_be_replaced)     
         return df
 
         

@@ -58,7 +58,13 @@ class Visualiser:
             fill_opacity=0.7,
             line_opacity=0.2,
             legend_name="Number of Speakers"
-        ).add_to(map)  
+        ).add_to(map) 
+    def trial_outline(self, map, coordinates):
+        folium.Polygon(
+            locations=coordinates,
+            color="blue",
+            fill=False
+        ).add_to(map) 
         
     
         
