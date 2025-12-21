@@ -37,36 +37,44 @@ class DataLoader:
                 file.write(html_content)
             return html_content
 
-
-      
-
-
-    def orchestrate_data_scraping(self, df: pd.DataFrame) -> list:
+    def orchestrate_data_scraping(self, df: pd.DataFrame) -> pd.DataFrame:
+        list_of_languages_without_speaker_number = df['language'].tolist()
         results_list = []
         for row in df.itertuples():
-            result = {"language": None,
-            "speaker_number_raw": None,
-            "speaker_number_numeric": None,
+            result = {"language": None, #from df
+            "speaker_number_raw": None, #from scraping, though some languages are yet to be scraped
+            "speaker_number_numeric": None, #will need to process raw to get numeric
             "speaker_number_type": None,
             "vitality_status": None,
+            "vitality_confidence": None, #will need to scrape by running through possible options and checking if they are in the html
             "speaker_year": None,
             "speaker_source": None,
-            "speaker_confidence": None,
             "speaker_method": None,
-            "speaker_url": []}
+            "source_url": []}
+            result["language"] = row.language
         
             for link in row.links:
-                url = link['url']
-                result["language"] = row.language
+                url = link['url']         
                 if 'endangeredlanguages.com' in url:
-                    result["speaker_url"].append(url)
-                    result["speaker_number_raw"] = self.scrape_data_from_website(url, "speaker-number-value")
-                    results_list.append(result)
-        return results_list
-                    
+                    result["source_url"].append(url)
+                    result["speaker_number_raw"] = self.scrape_data_from_class_field_from_website(url, html_class_field = "speaker-number-value")
                 
+                elif 'apics-online' in url:
+                    result["source_url"].append(url)
+                    result["speaker_number_raw"] = self.scrape_data_in_class_field_from_website(url, html_class_field= "key", string_expression = "Number of speakers", attribute = "td", method_called_after_label_identified="find_next_sibling")
+                if result["speaker_number_raw"]: 
+                    list_of_languages_without_speaker_number.remove(row.language)
+                   
+            results_list.append(result)
+            speaker_data_df = pd.DataFrame(results_list)
+            final_df = self.left_merge_data_frames(df, speaker_data_df)
+        return final_df
+                    
+    def left_merge_data_frames(self, df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
+        merged_df = pd.merge(df1, df2, how='left')
+        return merged_df #write to file
         
-    def scrape_data_from_website(self, url: str, html_class_field: str) -> dict:
+    def scrape_data_in_class_field_from_website(self, url: str, html_class_field: str = None, string_expression: str= None, attribute: str = "div", method_called_after_label_identified: str= None) -> dict:
         # Simulate web scraping (placeholder)
         
         CACHE_DIR = Path("cache")
@@ -76,12 +84,14 @@ class DataLoader:
 
         html = self.get_page(url)
         soup = BeautifulSoup(html, 'html.parser')
-        label = soup.find("div", class_=html_class_field)
-        
+        label = soup.find(attribute, class_ = html_class_field , string =  string_expression)
+        if method_called_after_label_identified == "find_next_sibling":
+            next_sibling_html = label.find_next_sibling(attribute)
+            speaker_number_raw = next_sibling_html.text.strip()
+            return speaker_number_raw
         if not label:
             return None
         speaker_number_raw = label.text.strip()
-
         return speaker_number_raw
 
         

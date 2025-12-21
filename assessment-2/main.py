@@ -27,9 +27,8 @@ def main():
     
     df = processor.replace_expression_in_values_in_column(df,'language', ' (Papua New Guinea)')
     df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
-    
-    results = data_loader.orchestrate_data_scraping(df)
-    print(results)
+    raw_speaker_number_for_tok_pisin = data_loader.scrape_data_in_class_field_from_website("https://apics-online.info/contributions/22", html_class_field= "key", string_expression = "Number of speakers", attribute = "td", method_called_after_label_identified="find_next_sibling")
+    print(f'{raw_speaker_number_for_tok_pisin} is the raw speaker number for Tok Pisin')
     
 
     
