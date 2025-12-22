@@ -24,12 +24,17 @@ def main():
     df = processor.create_new_dataframe_with_selected_columns(df, selected_columns)
     df = processor.remove_data(df, 'language', 'Bilua')
     df = processor.remove_data(df, 'language', 'Touo')
-    
     df = processor.replace_expression_in_values_in_column(df,'language', ' (Papua New Guinea)')
     df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
-    raw_speaker_number_for_tok_pisin = data_loader.scrape_data_in_class_field_from_website("https://apics-online.info/contributions/22", html_class_field= "key", string_expression = "Number of speakers", attribute = "td", method_called_after_label_identified="find_next_sibling")
-    print(f'{raw_speaker_number_for_tok_pisin} is the raw speaker number for Tok Pisin')
-    
+   
+    final_df, languages_without_speaker_number = data_loader.orchestrate_data_scraping(df)
+
+    print(f'Languages without speaker number: {languages_without_speaker_number}')
+    print(final_df.head())
+    data_loader.write_df_to_csv(final_df, 'data/language_speaker_data.csv')
+   
+#in some cases, wiki data not loading
+#andai and meakambut do not have figures n the df even though there is a figure on the endangered languages website- why?
 
     
     '''map = visualiser.create_map(df, location= analyser.mean_coordinates(df), zoom_start=6)
