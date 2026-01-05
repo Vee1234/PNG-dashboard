@@ -30,6 +30,14 @@ class Processor:
         except KeyError:
             print(f"Column '{column_name}' does not exist in the DataFrame.")
             return df
+    def replace_em_dash(self, df: pd.DataFrame) -> pd.DataFrame:
+        df['speaker_number_raw'] = (
+        df['speaker_number_raw']
+        .astype(str)
+        .str.replace(r'[\u2012\u2013\u2014]', '-', regex=True)
+        )
+        return df
+  
         
     def convert_geojson_to_gpd(self, df: pd.DataFrame):
         gdf = gpd.read_file("PNG_all_languages_coordinate_data.geojson")
@@ -50,10 +58,13 @@ class Processor:
         for index, row in df.iterrows():
             raw_value = row['speaker_number_raw']
             if pd.isna(raw_value):
+                df.at[index, 'speaker_number_numeric'] = None
                 continue
             raw_value = str(raw_value)
             if ',' in raw_value:
-                df.at[index, 'speaker_number_numeric'] = self.remove_commas(raw_value)
+                pass
+                #df.at[index, 'speaker_number_numeric'] = self.remove_commas(raw_value)
+            
             
         return df
         

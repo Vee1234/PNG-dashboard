@@ -31,11 +31,10 @@ def main():
     
     data_loader.write_df_to_csv(final_df, 'data/language_speaker_data.csv')'''
     language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data.csv')   
-               
-    language_speaker_data = processor.extract_numeric_speaker_number(language_speaker_data)
-
+    language_speaker_data = processor.replace_em_dash(language_speaker_data)
+    #language_speaker_data = processor.extract_numeric_speaker_number(language_speaker_data)
     data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_.csv')
-    print(language_speaker_data['speaker_number_numeric'])
+    
    
 #in some cases, wiki data not loading
 #andai and meakambut do not have figures n the df even though there is a figure on the endangered languages website- why?

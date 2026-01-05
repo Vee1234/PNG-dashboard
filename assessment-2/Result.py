@@ -16,6 +16,7 @@ class Result:
     source_type: str = None # eg. expert-curated, community-curated, automated
     access_route: str = None # direct, indirect, unverifiable
     source_confidence: int = None # number
+    notes: str = None 
     source_urls: List[str] = field(default_factory= list) # list of urls
     
 
