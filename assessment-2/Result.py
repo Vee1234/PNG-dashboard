@@ -6,6 +6,8 @@ class Result:
     speaker_number_raw: str = None # e.g., "about 1,000"
     speaker_number_numeric: int = None # cleaned
     speaker_number_type: str = None # estimate, range
+    speaker_number_min: int = None
+    speaker_number_max: int = None
     vitality_status: str = None #endangered, vulnerable, threatened
     vitality_certainty: int = None # percentage
     speaker_number_year: int = None #year that number was last updated

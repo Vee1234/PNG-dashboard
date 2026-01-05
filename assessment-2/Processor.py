@@ -30,6 +30,7 @@ class Processor:
         except KeyError:
             print(f"Column '{column_name}' does not exist in the DataFrame.")
             return df
+        
     def convert_geojson_to_gpd(self, df: pd.DataFrame):
         gdf = gpd.read_file("PNG_all_languages_coordinate_data.geojson")
         print(gdf)
@@ -38,14 +39,26 @@ class Processor:
         for link_list in df['links']:
             for link in link_list:              
                 link['url'] = link['url'].replace(expression, to_be_replaced)
-        return df       
-            
-       
+        return df           
 
     def replace_expression_in_values_in_column(self, df: pd.DataFrame, column, expression: str, to_be_replaced: str = '') -> pd.DataFrame:
         '''This function removes a specific expression from all values in a specified column of the dataframe.'''
         df[column]= df[column].str.replace(expression, to_be_replaced)     
         return df
+    
+    def extract_numeric_speaker_number(self, df: pd.DataFrame) -> int:
+        for index, row in df.iterrows():
+            raw_value = row['speaker_number_raw']
+            if pd.isna(raw_value):
+                continue
+            raw_value = str(raw_value)
+            if ',' in raw_value:
+                df.at[index, 'speaker_number_numeric'] = self.remove_commas(raw_value)
+            
+        return df
+        
+    def remove_commas(self, number_str: str) -> str:
+        return number_str.replace(',', '')
 
         
 

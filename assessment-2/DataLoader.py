@@ -29,6 +29,10 @@ class DataLoader:
             data = json.load(file)
         return data
     
+    def load_data_from_csv(self, data_address: str) -> pd.DataFrame:
+        df = pd.read_csv(data_address)
+        return df
+    
     def cache_path(self, url:str):
         url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()
         cache_file = Path("cache") / f"{url_hash}.html"
@@ -71,8 +75,7 @@ class DataLoader:
         for row in df.itertuples():
             result = Result()
             result = asdict(result)
-            result["language"] = row.language
-            print(f'Scraping speaker number for language: {row.language}')    
+            result["language"] = row.language  
             for link in row.links:
                 url = link['url']         
                 if 'endangeredlanguages.com' in url:
@@ -142,7 +145,6 @@ class DataLoader:
                 if attribute2 is None:
                     attribute2 = attribute1
                 for attr in soup.find_all(attribute1, class_=html_class_field):
-                    print(attr.get_text())
                     if string_expression in attr.get_text():
                         label = attr
                         next_sibling_html = label.find_next_sibling(attribute2)

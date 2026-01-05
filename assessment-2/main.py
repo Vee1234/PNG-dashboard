@@ -9,7 +9,7 @@ def main():
     analyser = Analyser(None)
     processor = Processor()
     
-    language_location_data = data_loader.load_data_from_json("data/PNG_all_languages_coordinate_data.geojson")
+    '''language_location_data = data_loader.load_data_from_json("data/PNG_all_languages_coordinate_data.geojson")
     df = processor.convert_json_to_df(language_location_data, 'features')
   
     columns_mapping = {
@@ -28,10 +28,14 @@ def main():
     df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
    
     final_df, languages_without_speaker_number = data_loader.orchestrate_data_scraping(df)
+    
+    data_loader.write_df_to_csv(final_df, 'data/language_speaker_data.csv')'''
+    language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data.csv')   
+               
+    language_speaker_data = processor.extract_numeric_speaker_number(language_speaker_data)
 
-    print(f'Languages without speaker number: {languages_without_speaker_number}')
-    print(final_df.head())
-    data_loader.write_df_to_csv(final_df, 'data/language_speaker_data.csv')
+    data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_.csv')
+    print(language_speaker_data['speaker_number_numeric'])
    
 #in some cases, wiki data not loading
 #andai and meakambut do not have figures n the df even though there is a figure on the endangered languages website- why?
