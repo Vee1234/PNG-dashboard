@@ -29,10 +29,13 @@ def main():
    
     final_df, languages_without_speaker_number = data_loader.orchestrate_data_scraping(df)
     
-    data_loader.write_df_to_csv(final_df, 'data/language_speaker_data.csv')'''
+    data_loader.write_df_to_csv(final_df, 'data/language_speaker_data.csv')''' #code required to create the original dataframe (collecting data from websites)
+    
+    #DATA CLEANING
     language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data.csv')   
-    language_speaker_data = processor.replace_em_dash(language_speaker_data)
-    #language_speaker_data = processor.extract_numeric_speaker_number(language_speaker_data)
+    language_speaker_data = processor.replace_regex_character(language_speaker_data, '[\u2012\u2013\u2014]', '-')
+    language_speaker_data = processor.replace_regex_character(language_speaker_data, '[\u00A0\u202F\u2007]', ' ')
+    language_speaker_data = processor.extract_numeric_speaker_number(language_speaker_data)
     data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_.csv')
     
    

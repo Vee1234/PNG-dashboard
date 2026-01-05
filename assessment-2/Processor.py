@@ -1,8 +1,10 @@
 import pandas as pd
 import geopandas as gpd
+import math
 import re
 class Processor:
     def __init__(self):
+        self.multipliers = {'million': 1000000, 'thousand': 1000}
         pass
        
     def convert_json_to_df(self, json_data:dict, highest_field_name: str) -> pd.DataFrame:
@@ -13,6 +15,11 @@ class Processor:
         meta=None,
         )
         return df
+    def round_sf(x, sig=4):
+        if x == 0:
+            return 0
+        else:
+            return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
     
     def rename_columns(self, df: pd.DataFrame, columns_mapping: dict) -> pd.DataFrame:
         '''This function renames the columns of the dataframe.'''
@@ -30,15 +37,13 @@ class Processor:
         except KeyError:
             print(f"Column '{column_name}' does not exist in the DataFrame.")
             return df
-    def replace_em_dash(self, df: pd.DataFrame) -> pd.DataFrame:
-        df['speaker_number_raw'] = (
-        df['speaker_number_raw']
-        .astype(str)
-        .str.replace(r'[\u2012\u2013\u2014]', '-', regex=True)
+    def replace_regex_character(self, df: pd.DataFrame, original_regex: str, replacement_character: str) -> pd.DataFrame:
+        df = df.replace(
+        {rf'{original_regex}': replacement_character},
+        regex=True
         )
         return df
   
-        
     def convert_geojson_to_gpd(self, df: pd.DataFrame):
         gdf = gpd.read_file("PNG_all_languages_coordinate_data.geojson")
         print(gdf)
@@ -55,21 +60,53 @@ class Processor:
         return df
     
     def extract_numeric_speaker_number(self, df: pd.DataFrame) -> int:
-        for index, row in df.iterrows():
-            raw_value = row['speaker_number_raw']
-            if pd.isna(raw_value):
-                df.at[index, 'speaker_number_numeric'] = None
-                continue
-            raw_value = str(raw_value)
-            if ',' in raw_value:
-                pass
+        df['speaker_number_raw'] = self.remove_commas(df, 'speaker_number_raw')
+        mask_before_cited = (
+        df['speaker_number_raw']
+        .str.lower()
+        .str.split('cited', n=1)
+        .str[0]
+        .str.contains(r'(\d{1,5})', na=False)
+        )
+
+        mask_after_cited = (
+        df['speaker_number_raw']
+        .str.lower()
+        .str.split('cited', n=1)
+        .str[1]
+        .str.contains(r'(\d{1,5})', na=False)
+        )
+
+        
+        # Extract numeric values before 'cited'
+        df.loc[mask_before_cited, 'speaker_number_numeric'] = (
+        df.loc[mask_before_cited, 'speaker_number_raw']
+        .str.lower()
+        .str.split('cited', n=1)
+        .str[0]
+        .str.extract(r'(\d{1,5})')[0]
+        .astype('Int64')
+        )
+
+        # Extract numeric values after 'cited'
+        df.loc[mask_after_cited, 'speaker_number_year'] = (
+        df.loc[mask_after_cited, 'speaker_number_raw']
+        .str.lower()
+        .str.split('cited', n=1)
+        .str[1]
+        .str.extract(r'(\d{1,5})')[0]
+        .astype('Int64')
+        )       
+
+            #number_of_speakers = int(re.search(r'(\d{2,})', raw_value).group()) #first value in the expression is the number of speakers
+            #row['speaker_number_numeric'] =  number_of_speakers
                 #df.at[index, 'speaker_number_numeric'] = self.remove_commas(raw_value)
             
             
         return df
         
-    def remove_commas(self, number_str: str) -> str:
-        return number_str.replace(',', '')
+    def remove_commas(self, df: pd.DataFrame, column_name: str) -> str:
+        return df[column_name].astype(str).str.replace(',', '')
 
         
 
