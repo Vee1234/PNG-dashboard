@@ -5,7 +5,7 @@ import numpy as np
 import scipy as sp
 class Analyser:
     def __init__(self, data_address):
-        self.confidence_score_dict = {'source_category': {'primary': 1, 'secondary': 0.75, 'tertiary': 0.5}, 
+        self.source_confidence_dict = {'source_category': {'primary': 1, 'secondary': 0.75, 'tertiary': 0.5}, 
                                       'source_type': {'expert-curated': 1, 'community-curated': 0.75}, 
                                       'speaker_number_type': {'exact': 1, 'estimate': 0.75, 'range': 0.5, 'qualitative estimate': 0.25, 'qualitative range': 0.25},
                                       'access_route': {'direct': 1, 'indirect': 0.5} }
@@ -14,9 +14,19 @@ class Analyser:
         mid_latitude = ((df['latitude'].max() + df['latitude'].min())) / 2
         mid_longitude = ((df['longitude']).max() + df['longitude'].min()) / 2
         return (mid_latitude, mid_longitude)
-    def calculate_confidence_score(self,row):
+    def calculate_source_confidence(self,row):
         if pd.notna(row["source_category"]) and pd.notna(row["source_type"]) and pd.notna(row["access_route"]) and pd.notna(row['speaker_number_type']):
-            row["source_confidence"] = round(self.confidence_score_dict['source_category'][row["source_category"]] * self.confidence_score_dict['source_type'][row["source_type"]] * self.confidence_score_dict['access_route'][row["access_route"]] * self.confidence_score_dict['speaker_number_type'][row['speaker_number_type']],2)
+            row["source_confidence"] = round(self.source_confidence_dict['source_category'][row["source_category"]] * self.source_confidence_dict['source_type'][row["source_type"]] * self.source_confidence_dict['access_route'][row["access_route"]] * self.source_confidence_dict['speaker_number_type'][row['speaker_number_type']],2)
+        return row
+    def calculate_min_and_max_for_not_ranges(self, row):
+        if row['speaker_number_type'] == 'exact':
+            row['speaker_number_min'] = row['speaker_number_numeric']
+            row['speaker_number_max'] = row['speaker_number_numeric']
+        if row['speaker_number_type'] == 'estimate' or row['speaker_number_type'] == 'qualitative estimate':
+            row['speaker_number_min'] = row['speaker_number_numeric'] * (1-(1- row["source_confidence"]))
+            row['speaker_number_max'] = row['speaker_number_numeric'] * (1+ (1- row["source_confidence"]))
+        if  row['speaker_number_type'] == 'qualitative range':
+            row['speaker_number_max'] = row['speaker_number_max'] * (1+ (1- row["source_confidence"]))
         return row
    
     def create_geometry(self, df):

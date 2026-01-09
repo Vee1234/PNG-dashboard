@@ -1,14 +1,20 @@
 import streamlit as st
 import pandas as pd
 import folium
+import numpy as np
 from streamlit_folium import st_folium
 import altair as alt
+from folium.plugins import MarkerCluster
+import math
 class Visualiser:
     def __init__(self):
         pass
-
+    def show_title(self, title: str):
+        st.title(title)
     def create_map(self, df, location: tuple = (-5, 149), zoom_start: int = 6) -> folium.Map:
         # Create a folium map object
+        st.header("Language Speaker Distribution Map")
+        st.caption("Hover over the points to see more information about each language.")
         map = folium.Map(location=location, zoom_start=zoom_start, scrollWheelZoom=False, tiles='OpenStreetMap')
         return map
     
@@ -41,9 +47,43 @@ class Visualiser:
     
         return "<br>".join(lines)
     
+    def show_cluster(self, map: folium.Map, df) -> folium.plugins.MarkerCluster:
+        cluster = MarkerCluster(
+        name="Languages",
+        disableClusteringAtZoom=11  # <- circles appear when zoomed in enough
+        ).add_to(map)
+        self.add_points_to_cluster(df, cluster)
+        return cluster
+    
+    def display_filtered_map(self, df, cluster):
+
+        max_power_of_ten = math.ceil(math.log10(df['speaker_number_max'].max()))
+        steps = [i for i in range(-1, max_power_of_ten + 1)]
+        print(df['speaker_number_min'].min().unique())
+        with st.sidebar:
+            st.header("Filter Languages")
+            min_speakers = int(df['speaker_number_min'].min())
+            max_speakers = int(df['speaker_number_max'].max())
+            user_min, user_max = st.sidebar.slider(
+            "Number of speakers",
+            steps,
+            value=(min_speakers, max_speakers),
+            label_visibility="hidden"
+            
+            )
+            st.markdown("Scale: 1 · 10 · 100 · 1,000 · 10,000 · 100,000 · 1,000,000")
+            st.markdown(f"**Selected range:** {user_min} to {user_max} speakers")
+        filtered_values = np.where((df['speaker_number_max']>=user_min) & (df['speaker_number_min']<=user_max))
+        filtered_df = df.loc[filtered_values]
+        self.add_points_to_cluster(filtered_df, cluster)
+
+        return filtered_df
+
+    
     def show_logarithmic_bar_graph(self, df: pd.DataFrame):
         df_plot = df[df["plotting_data"].notna()]
-        
+        st.header("Number of Speakers per Language")
+        st.caption("Bar chart showing the number of speakers for each language on a logarithmic scale. Languages marked in red are classified as extinct.")
         chart = (
             alt.Chart(df_plot)
             .mark_bar()
@@ -55,8 +95,8 @@ class Visualiser:
                     title="Number of speakers (log scale)"
                 ),
                 color=alt.condition(
-                    alt.datum.speaker_status == "extinct",
-                    alt.value("lightgray"),
+                    alt.datum.vitality_status == "extinct",
+                    alt.value("red"),
                     alt.value("steelblue")
                 ),
                 tooltip=[
@@ -65,12 +105,9 @@ class Visualiser:
                 ]
             )
         )
-
-
-
         st.altair_chart(chart, use_container_width=True)
 
-    def add_points_to_map(self, df: pd.DataFrame, map: folium.Map) -> folium.Map:
+    def add_points_to_cluster(self, df: pd.DataFrame, cluster) -> folium.Map:
         for idx, row in df.iterrows():
             folium.Circle(
                 location=[row['latitude'], row['longitude']],
@@ -81,13 +118,15 @@ class Visualiser:
                 fill = True,
                 opacity = 1,
 
-            ).add_to(map)
+            ).add_to(cluster)
 
     def display_map(self, map: folium.Map):
         # Save the map to an HTML file
         map.save("map.html")
         # Display the map in Streamlit
         st.components.v1.html(open("map.html", "r").read(), width=1500, height=1200)
+        with open("map.html", "w") as f:
+            f.write('')
 
     def add_voronoi_to_map(self, vor_web, map: folium.Map) -> folium.Map:
         folium.Choropleth(

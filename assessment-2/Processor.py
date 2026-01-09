@@ -200,7 +200,7 @@ class Processor:
         )
 
         # Case 2: extinct or dormant → 1
-        df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "plotting_data"] = 1
+        df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "plotting_data"] = df["speaker_number_numeric"].min()-0.5
 
         # Case 3: exact → numeric
         df.loc[df["speaker_number_type"] == "estimate", "plotting_data"] = df["speaker_number_numeric"]
@@ -232,7 +232,7 @@ class Processor:
             df["speaker_number_raw"]
         )
         df.loc[df["speaker_number_type"] == "exact", "bar_chart_tooltip_value"] = (
-            df["speaker_number_numeric"]
+            int(df["speaker_number_numeric"])
         )
         df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "bar_chart_tooltip_value"] = (
             df["vitality_status"]
