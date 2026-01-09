@@ -10,9 +10,6 @@ from Result import Result
 from requests.exceptions import ReadTimeout, RequestException
 class DataLoader:
     def __init__(self):
-        self.confidence_score_dict = {'source_category': {'primary': 0.9, 'secondary': 0.7, 'tertiary': 0.4 }, 
-                                      'source_type': {'expert-curated': 0.1, 'community-curated': 0.05}, 
-                                      'access_route': {'direct': 0, 'indirect': -0.1} }
         self.headers =  {
                         "User-Agent": (
                         "PapuanLanguagesResearchBot/1.0 "
@@ -69,7 +66,7 @@ class DataLoader:
         print(f"Failed to retrieve {url} after {retries} attempts.")
         return None
           
-    def orchestrate_data_scraping(self, df: pd.DataFrame) -> pd.DataFrame:
+    def orchestrate_data_scraping_per_domain_name(self, df: pd.DataFrame, domain_name: str, speaker_number_html_field: str, source_category: str, source_type: str, access_route: str, attribute1: str = None, attribute2: str = None, string_expression: str = None, method_called_after_label_identified: str= None, preference_list: list = ['endangeredlanguages.com', 'apics-online.info', 'wikipedia.org'], vitality_status_html_field: str= None, vitality_certainty_html_field: str= None) -> pd.DataFrame:
         list_of_languages_without_speaker_number = df['language'].tolist()
         results_list = []
         for row in df.itertuples():
@@ -78,33 +75,19 @@ class DataLoader:
             result["language"] = row.language  
             for link in row.links:
                 url = link['url']         
-                if 'endangeredlanguages.com' in url:
+                if domain_name in url and (preference_list.index(result["speaker_source"])>preference_list.index(domain_name) or result["speaker_source"] == None):
+                    result["speaker_number_raw"] = self.scrape_data_in_class_field_from_website(url, html_class_field = speaker_number_html_field, string_expression= string_expression, attribute1 = attribute1, attribute2 = attribute2, method_called_after_label_identified= method_called_after_label_identified)
+                    result["source_urls"].clear()
                     result["source_urls"].append(url)
-                    result["speaker_number_raw"] = self.scrape_data_in_class_field_from_website(url, html_class_field = "speaker-number-value") 
-                    result["speaker_source"] = 'endangeredlanguages.com'
-                    result["source_category"] = 'secondary' 
-                    result["source_type"] = 'expert-curated'
-                    result["access_route"] = 'direct'
-                    result["source_confidence"] = round(self.confidence_score_dict['source_category'][result["source_category"]] + self.confidence_score_dict['source_type'][result["source_type"]] + self.confidence_score_dict['access_route'][result["access_route"]],2)
-                    break
-                elif 'apics-online' in url:
-                    result["source_urls"].append(url)
-                    result["speaker_number_raw"] = self.scrape_data_in_class_field_from_website(url, html_class_field= "key", string_expression = "Number of speakers", attribute1 = "td", method_called_after_label_identified="find_next_sibling")
-                    result["speaker_source"] = 'apics-online.info'
-                    result["source_category"] = 'secondary' 
-                    result["source_type"] = 'expert-curated'
-                    result["access_route"] = 'direct'
-                    result["source_confidence"] = round(self.confidence_score_dict['source_category'][result["source_category"]] + self.confidence_score_dict['source_type'][result["source_type"]] + self.confidence_score_dict['access_route'][result["access_route"]], 2)
-                    break
-                elif 'wikipedia.org' in url:
-                    result["source_urls"].append(url)
-                    result["speaker_number_raw"] = self.scrape_data_in_class_field_from_website(url, html_class_field= "infobox-label", string_expression = "Native speakers", attribute1 = "th", attribute2 = "td", method_called_after_label_identified="find_next_sibling")
-                    result["speaker_source"] = 'wikipedia.org'
-                    result["source_category"] = 'tertiary' 
-                    result["source_type"] = 'community-curated'
-                    result["access_route"] = 'direct'
-                    result["source_confidence"] = round(self.confidence_score_dict['source_category'][result["source_category"]] + self.confidence_score_dict['source_type'][result["source_type"]] + self.confidence_score_dict['access_route'][result["access_route"]], 2)
-                    break
+                    result["speaker_source"] = domain_name
+                    result["source_category"] = source_category
+                    result["source_type"] = source_type
+                    result["access_route"] = access_route
+                    #placeholder html_class_field for vitality status and vitality certainty.
+                    if vitality_status_html_field:
+                        result["vitality_status"] = self.scrape_data_in_class_field_from_website(url, html_class_field = vitality_status_html_field) 
+                    if vitality_certainty_html_field:
+                        result["vitality_certainty"] = self.scrape_data_in_class_field_from_website(url, html_class_field = vitality_certainty_html_field)
             if result["speaker_number_raw"]: 
                 list_of_languages_without_speaker_number.remove(row.language) 
             if result["speaker_number_raw"] == "Extinct":
@@ -115,7 +98,7 @@ class DataLoader:
             speaker_data_df = pd.DataFrame(results_list)
             final_df = self.left_merge_data_frames(df, speaker_data_df)
         return final_df, list_of_languages_without_speaker_number
-    
+      
     def fill_columns_based_on_language_vitality(self, vitality_label:str, result_dict: dict) -> dict:
         result_dict["vitality_status"] = vitality_label.lower()
         result_dict["speaker_number_raw"] = None
