@@ -3,7 +3,6 @@ import pandas as pd
 import folium
 from folium import Element
 import numpy as np
-from streamlit_folium import st_folium
 import altair as alt
 from folium.plugins import MarkerCluster
 import math

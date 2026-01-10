@@ -1,6 +1,4 @@
 import pandas as pd
-import geopandas as gpd
-import math
 import re
 from shapely.geometry import Point, shape
 class Processor:

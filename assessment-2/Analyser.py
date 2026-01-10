@@ -1,8 +1,5 @@
-import geopandas as gpd
 import pandas as pd
-from shapely.geometry import Point, shape
-import numpy as np
-import scipy as sp
+
 class Analyser:
     def __init__(self):
         self.SOURCE_CONFIDENCE_DICT = {'source_category': {'primary': 1, 'secondary': 0.75, 'tertiary': 0.5}, 
