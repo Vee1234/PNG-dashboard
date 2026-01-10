@@ -263,7 +263,7 @@ class Visualiser:
     def display_map(self, map: folium.Map, filename: str):
         '''Saves map html to a file and displays the folium map in Streamlit.'''
         map.save(filename)
-        st.components.v1.html(open(filename, "r").read(), width=700, height=700)
+        st.components.v1.html(open(filename, "r").read(), width=700, height=500)
          
     def create_choropleth(self, geo_data, frequency_data, map: folium.Map):
         folium.Choropleth(
