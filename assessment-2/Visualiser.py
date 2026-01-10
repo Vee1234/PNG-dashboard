@@ -227,7 +227,7 @@ class Visualiser:
             )
         )
 
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width = 'stretch')
 
     def assign_colour_based_on_speaker_number(self, df, idx) -> pd.DataFrame:
         speaker_number = df.at[idx, 'plotting_data'] 
