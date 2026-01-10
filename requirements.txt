@@ -4,7 +4,6 @@ folium
 numpy
 streamlit-folium
 altair
-math
 requests
 hashlib
 pathlib
