@@ -2,20 +2,17 @@ streamlit
 pandas
 folium
 numpy
+streamlit-folium
 altair
-folium.plugins
-pathlib
-json
-dataclasses
-bs4
+math
 requests
 hashlib
-time
-requests.exceptions
-re
+pathlib
+time 
+json
+bs4
 shapely
-
-
+re
 
 
 
