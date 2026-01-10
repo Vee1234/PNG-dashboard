@@ -345,7 +345,7 @@ class Visualiser:
                 and row["language"] == selected_language )
 
             color = "red" if is_selected else "white"
-            radius = 10 if is_selected else 4
+            radius = 10 if is_selected else 1
 
             cluster = MarkerCluster(
                 name="Languages",
