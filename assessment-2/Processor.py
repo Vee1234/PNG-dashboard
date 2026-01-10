@@ -2,6 +2,7 @@ import pandas as pd
 import geopandas as gpd
 import math
 import re
+from shapely.geometry import Point, shape
 class Processor:
     def __init__(self):
         self.MULTIPLIERS = {'million': 1000000, 'thousand': 1000, 'hundred': 100, 'dozen': 12}
@@ -22,38 +23,33 @@ class Processor:
         meta=None,
         )
         return df
-    def round_sf(x, sig=4):
-        if x == 0:
-            return 0
-        else:
-            return round(x, sig - int(math.floor(math.log10(abs(x)))) - 1)
-    
+        
     def rename_columns(self, df: pd.DataFrame, columns_mapping: dict) -> pd.DataFrame:
         '''This function renames the columns of the dataframe.'''
         renamed_df = df.rename(columns=columns_mapping)
         return renamed_df
     
     def create_new_dataframe_with_selected_columns(self, df: pd.DataFrame, selected_columns: list) -> pd.DataFrame:
+        '''This function creates a new dataframe with only the selected columns.'''
         new_df = df[selected_columns].copy()
         return new_df 
     
     def remove_data(self, df: pd.DataFrame, column_name, condition) -> pd.DataFrame:
+        '''This function removes rows from the dataframe based on a condition in a specific column.'''
         try:
             df = df.drop(df[df[column_name] == condition].index)
             return df
         except KeyError:
             print(f"Column '{column_name}' does not exist in the DataFrame.")
             return df
+        
     def replace_regex_character(self, df: pd.DataFrame, original_regex: str, replacement_character: str) -> pd.DataFrame:
+        '''Replaces characters in the dataframe based on a regex pattern.'''
         df = df.replace(
         {rf'{original_regex}': replacement_character},
         regex=True
         )
         return df
-  
-    def convert_geojson_to_gpd(self, df: pd.DataFrame):
-        gdf = gpd.read_file("PNG_all_languages_coordinate_data.geojson")
-        print(gdf)
     
     def replace_url_in_values_in_column(self, df: pd.DataFrame, expression: str, to_be_replaced: str = '') -> pd.DataFrame:
         for link_list in df['links']:
@@ -65,11 +61,13 @@ class Processor:
         '''This function removes a specific expression from all values in a specified column of the dataframe.'''
         df[column]= df[column].str.replace(expression, to_be_replaced)     
         return df
-    
-    
-    
+
     def clean_speaker_number(self, row) -> int:
-        
+        """
+        Cleans and converts the raw speaker number into a numeric format, handling missing or malformed data.
+        -Identifies exact, ranges, estimates, and qualitative descriptions.
+        -Populates the relevant fields in the row dictionary.
+        """    
         try:
             raw = row["speaker_number_raw"]
             # ---------- Possibility 1: Missing data ----------
@@ -190,9 +188,40 @@ class Processor:
             # Absolute safety net
             row["speaker_number_numeric"] = None
             return row
+        
+    def build_province_language_mapping(self, boundaries_data, language_df):
+        '''This function builds a mapping of provinces to the number of languages spoken in each province.
+        -OUTPUT: DataFrame with columns 'Province', 'Number of Languages', 'Languages List'''
+
+        df = pd.DataFrame(columns=['Province', 'Number of Languages', 'Languages List'])
+        for feature in boundaries_data['features']:
+                polygon = shape(feature['geometry'])
+                for index, row in language_df.iterrows():
+                    language = row['language']
+                    longitude = row['longitude']
+                    latitude = row['latitude']
+                    point = Point(longitude, latitude) 
+                    if polygon.contains(point):
+                        if feature['properties']['shapeName'] not in df['Province'].values:
+                            new_row =pd.DataFrame([{
+                                'Province': feature['properties']['shapeName'],
+                                'Number of Languages': 0,
+                                'Languages List': []
+                            }])
+                            df = pd.concat([df, new_row], ignore_index=True)
+                        province_index = df.index[df['Province'] == feature['properties']['shapeName']][0]
+                        df.at[province_index, "Number of Languages"] += 1
+                        df.at[province_index, "Languages List"].append(language)    
+                            
+                    else:
+                        continue
+        return df
 
     def create_plotting_data_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["plotting_data"] = None  # start with empty column
+        '''Creates a plotting data column for the dataframe. 
+        Used for visualisations where a single numerical value is required for each language, e.g., bar charts'''
+
+        df["plotting_data"] = None 
         df["speaker_number_min"] = pd.to_numeric(df["speaker_number_min"], errors="coerce")
         df["speaker_number_max"] = pd.to_numeric(df["speaker_number_max"], errors="coerce")
         df["speaker_number_numeric"] = pd.to_numeric(df["speaker_number_numeric"], errors="coerce")
@@ -203,7 +232,7 @@ class Processor:
             (df["speaker_number_min"] + df["speaker_number_max"]) / 2
         )
 
-        # Case 2: extinct or dormant → 1
+        # Case 2: extinct or dormant → value below minimum
         df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "plotting_data"] = df["speaker_number_numeric"].min()-0.5
         
 
@@ -212,16 +241,14 @@ class Processor:
         df.loc[df["speaker_number_type"] == "exact", "plotting_data"] = df["speaker_number_numeric"]
         df.loc[df["speaker_number_type"] == "qualitative estimate", "plotting_data"] = df["speaker_number_numeric"]
         df.loc[df["speaker_number_type"] == "qualitative range", "plotting_data"] = (
-            (df["speaker_number_min"] + df["speaker_number_max"])/ 2
-        )
-        # Case 4: optional - NA handled automatically
+            (df["speaker_number_min"] + df["speaker_number_max"])/ 2)
+       
         return df
-            #number_of_speakers = int(re.search(r'(\d{2,})', raw_value).group()) #first value in the expression is the number of speakers
-            #row['speaker_number_numeric'] =  number_of_speakers
-                #df.at[index, 'speaker_number_numeric'] = self.remove_commas(raw_value)
+
             
     def create_tooltip_column_for_barchart(self, df) -> pd.DataFrame:
         '''This function creates a tooltip column for the dataframe.'''
+
         df["bar_chart_tooltip_value"] = pd.NA  # start with empty column
 
         df.loc[df["speaker_number_type"] == "range", "bar_chart_tooltip_value"] = (
@@ -242,9 +269,9 @@ class Processor:
         df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "bar_chart_tooltip_value"] = (
             df["vitality_status"]
         )
+        return df 
 
-        return df   
-    
+        
         
         
 
