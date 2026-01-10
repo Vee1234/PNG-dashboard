@@ -66,6 +66,8 @@ class Processor:
         df[column]= df[column].str.replace(expression, to_be_replaced)     
         return df
     
+    
+    
     def clean_speaker_number(self, row) -> int:
         
         try:
@@ -81,6 +83,8 @@ class Processor:
             if raw.isdigit():
                 row["speaker_number_numeric"] = int(raw)
                 row["speaker_number_type"] = "exact"
+                row["speaker_number_min"] = row["speaker_number_numeric"]
+                row["speaker_number_max"] = row["speaker_number_numeric"]
                 return row
             # ---------- Possibility 3: Cited ----------
             if "cited" in raw:
@@ -156,7 +160,7 @@ class Processor:
                                         except:
                                             q_val = 1
                                     if "fewer than" in raw or "less than" in raw or "or less" in raw or "or fewer" in raw:
-                                        row["speaker_number_min"] = "0"
+                                        row["speaker_number_min"] = 0
                                         row["speaker_number_max"] = int(q_val * self.MULTIPLIERS.get(m, 1))
                                         row["speaker_number_type"] = "qualitative range"
                                         return row
@@ -188,7 +192,7 @@ class Processor:
             return row
 
     def create_plotting_data_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["plotting_data"] = pd.NA  # start with empty column
+        df["plotting_data"] = None  # start with empty column
         df["speaker_number_min"] = pd.to_numeric(df["speaker_number_min"], errors="coerce")
         df["speaker_number_max"] = pd.to_numeric(df["speaker_number_max"], errors="coerce")
         df["speaker_number_numeric"] = pd.to_numeric(df["speaker_number_numeric"], errors="coerce")
@@ -201,6 +205,7 @@ class Processor:
 
         # Case 2: extinct or dormant → 1
         df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "plotting_data"] = df["speaker_number_numeric"].min()-0.5
+        
 
         # Case 3: exact → numeric
         df.loc[df["speaker_number_type"] == "estimate", "plotting_data"] = df["speaker_number_numeric"]
@@ -232,7 +237,7 @@ class Processor:
             df["speaker_number_raw"]
         )
         df.loc[df["speaker_number_type"] == "exact", "bar_chart_tooltip_value"] = (
-            int(df["speaker_number_numeric"])
+            df["speaker_number_numeric"]
         )
         df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "bar_chart_tooltip_value"] = (
             df["vitality_status"]

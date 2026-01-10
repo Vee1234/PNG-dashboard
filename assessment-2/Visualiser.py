@@ -1,20 +1,110 @@
 import streamlit as st
 import pandas as pd
 import folium
+from folium import Element
 import numpy as np
 from streamlit_folium import st_folium
 import altair as alt
 from folium.plugins import MarkerCluster
 import math
+from Analyser import Analyser
 class Visualiser:
     def __init__(self):
-        pass
+        self.analyser = Analyser()
+        self.icon_create_function =  """
+        
+        function(cluster) {
+    var count = cluster.getChildCount();
+    var color = count <10 ? 'yellow' :
+                count <80 ? 'orange' :
+                'red';
+
+     
+    var size = 20 + Math.log(count) * 15;
+
+    return new L.DivIcon({
+        html: '<div style="width:' + size + 'px; height:' + size +
+              'px; line-height:' + size +
+              'px; border-radius:50%; background-color:' + color + '; color:black; text-align:center;">' +
+              '<span>' + count + '</span></div>',
+        className: 'marker-cluster',
+        iconSize: new L.Point(size, size)
+    });
+    }
+    """
+        self.legend_html = """
+<div style="
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    background-color: white;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    font-size: 14px;
+    line-height: 1.4;
+">
+<b>Number of speakers</b><br><br>
+
+<span style="display:inline-block;
+             width:14px;
+             height:14px;
+             background-color:black;
+             border-radius:50%;
+             margin-right:6px;"></span>
+Extinct/Dormant<br>
+
+<span style="display:inline-block;
+             width:14px;
+             height:14px;
+             background-color:green;
+             border-radius:50%;
+             margin-right:6px;"></span>
+Low (<100)<br>
+
+<span style="display:inline-block;
+             width:14px;
+             height:14px;
+             background-color:yellow;
+             border-radius:50%;
+             margin-right:6px;"></span>
+Medium (100-999)<br>
+
+<span style="display:inline-block;
+             width:14px;
+             height:14px;
+             background-color:orange;
+             border-radius:50%;
+             margin-right:6px;"></span>
+High (1,000-9,999 )<br>
+
+<span style="display:inline-block;
+             width:14px;
+             height:14px;
+             background-color:red;
+             border-radius:50%;
+             margin-right:6px;"></span>
+High (10,000-99,999)<br>
+
+<span style="display:inline-block;
+             width:14px;
+             height:14px;
+             background-color:darkred;
+             border-radius:50%;
+             margin-right:6px;"></span>
+Very High (>= 100,00)<br>
+
+</div>
+"""
+
+        
     def show_title(self, title: str):
         st.title(title)
-    def create_map(self, df, location: tuple = (-5, 149), zoom_start: int = 6) -> folium.Map:
+    def create_map(self, header, caption, location: tuple = (-5, 149), zoom_start: int = 6) -> folium.Map:
         # Create a folium map object
-        st.header("Language Speaker Distribution Map")
-        st.caption("Hover over the points to see more information about each language.")
+        st.header(header)
+        st.caption(caption)
         map = folium.Map(location=location, zoom_start=zoom_start, scrollWheelZoom=False, tiles='OpenStreetMap')
         return map
     
@@ -55,31 +145,44 @@ class Visualiser:
         self.add_points_to_cluster(df, cluster)
         return cluster
     
-    def display_filtered_map(self, df, cluster):
+    def display_filtered_map(self, df, map) -> pd.DataFrame:
+        map.get_root().html.add_child(Element(self.legend_html))
+        max_power_of_ten = float(math.ceil(math.log10(df['speaker_number_max'].max())))
+        min_power_of_ten = -1.0
+        try:
+            with st.sidebar:
+                st.header("Filter Languages")
+                user_min, user_max = st.sidebar.slider(
+                "Number of speakers",
+                min_value=min_power_of_ten,
+                max_value=max_power_of_ten,
+                value=(min_power_of_ten, max_power_of_ten),
+                label_visibility="hidden"
+                )
+                st.markdown("Logarithmic scale")
+                if user_min == min_power_of_ten:
+                    user_min = 0
+                else: 
+                    user_min = 10**user_min
+                user_max = 10**user_max
+                st.markdown(f"**Selected range:** {'{:,}'.format(int(user_min))} to {'{:,}'.format(int(user_max))} speakers")
 
-        max_power_of_ten = math.ceil(math.log10(df['speaker_number_max'].max()))
-        steps = [i for i in range(-1, max_power_of_ten + 1)]
-        print(df['speaker_number_min'].min().unique())
-        with st.sidebar:
-            st.header("Filter Languages")
-            min_speakers = int(df['speaker_number_min'].min())
-            max_speakers = int(df['speaker_number_max'].max())
-            user_min, user_max = st.sidebar.slider(
-            "Number of speakers",
-            steps,
-            value=(min_speakers, max_speakers),
-            label_visibility="hidden"
             
-            )
-            st.markdown("Scale: 1 · 10 · 100 · 1,000 · 10,000 · 100,000 · 1,000,000")
-            st.markdown(f"**Selected range:** {user_min} to {user_max} speakers")
-        filtered_values = np.where((df['speaker_number_max']>=user_min) & (df['speaker_number_min']<=user_max))
-        filtered_df = df.loc[filtered_values]
-        self.add_points_to_cluster(filtered_df, cluster)
+            filtered_values = np.where((df['speaker_number_max']>=user_min) & (df['speaker_number_min']<=user_max))
+            filtered_df = df.loc[filtered_values]
+            st.write(f'Number of languages in selected range: {len(filtered_df)}')
 
+
+            cluster = folium.plugins.MarkerCluster(disableClusteringAtZoom=11, icon_create_function=self.icon_create_function)
+            self.add_points_to_cluster(filtered_df, cluster)
+            cluster.add_to(map)
+            
+
+        except Exception as e:
+            st.error("Maximum speakers cannot be less than minimum speakers. Please adjust the slider values.")
         return filtered_df
 
-    
+  
     def show_logarithmic_bar_graph(self, df: pd.DataFrame):
         df_plot = df[df["plotting_data"].notna()]
         st.header("Number of Speakers per Language")
@@ -106,62 +209,143 @@ class Visualiser:
             )
         )
         st.altair_chart(chart, use_container_width=True)
+    def assign_colour_based_on_speaker_number(self, df, idx) -> pd.DataFrame:
+        speaker_number = df.at[idx, 'plotting_data'] 
+        vitality_status = df.at[idx, 'vitality_status']
+        
+        if pd.isna(speaker_number) and pd.isna(vitality_status):
+            return "gray"
+        elif vitality_status == 'extinct' or vitality_status == 'dormant':
+            return "black"
+        elif speaker_number < 100:
+            return "green"
+        elif 100 <= speaker_number < 1000:
+            return "yellow"
+        elif 1000 <= speaker_number < 10000:
+            return "orange"
+        elif speaker_number >= 100000:
+            return "red"
+        else:
+            return "darkred"
+        
+
+        
+
 
     def add_points_to_cluster(self, df: pd.DataFrame, cluster) -> folium.Map:
         for idx, row in df.iterrows():
+
             folium.Circle(
                 location=[row['latitude'], row['longitude']],
-                color="black",
-                tooltip= folium.Tooltip(self.structure_popup(row), max_width=300), #what is the correct syntax to have multple pieces of info in the popup?
-                radius=6000,
+                color=self.assign_colour_based_on_speaker_number(df, idx),
+                tooltip= folium.Tooltip(self.structure_popup(row), max_width=300),
+                radius=15000,
                 stroke = False,
                 fill = True,
                 opacity = 1,
 
             ).add_to(cluster)
+           
 
-    def display_map(self, map: folium.Map):
+    def display_map(self, map: folium.Map, filename: str):
         # Save the map to an HTML file
-        map.save("map.html")
+        map.save(filename)
         # Display the map in Streamlit
-        st.components.v1.html(open("map.html", "r").read(), width=1500, height=1200)
-        with open("map.html", "w") as f:
-            f.write('')
+        st.components.v1.html(open(filename, "r").read(), width=1500, height=1200)
+        
+       
+    def trial_choropleth(self, geo_data, frequency_data, map: folium.Map):
+        
+        folium.Choropleth(
+            geo_data=geo_data,
+            data=frequency_data,
+            fill_opacity= 1.0,
+            highlight=True,
+            legend_name="Number of Languages",
+            columns=["Province", "Number of Languages"],
+            key_on="feature.properties.shapeName",
 
-    def add_voronoi_to_map(self, vor_web, map: folium.Map) -> folium.Map:
-        folium.Choropleth(
-            geo_data=vor_web,
-            data=vor_web,
-            columns=["Language", "Language ID"],
-            key_on="Language",
-            fill_color="YlOrRd",
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            legend_name="Number of Speakers"
         ).add_to(map)
+        self.add_geojson_tooltip(geo_data, frequency_data, map)
         
-    def trial_chloropleth(self, df, map):
-        folium.Choropleth(
-            geo_data='data/pg.json',
-            data=df,
-            columns=["Language", "Language ID"],
-            key_on="Language",
-            fill_color="YlOrRd",
-            fill_opacity=0.7,
-            line_opacity=0.2,
-            legend_name="Number of Speakers"
-        ).add_to(map) 
-    def trial_outline(self, map, coordinates):
-        folium.Polygon(
-            locations=coordinates,
-            color="blue",
-            fill=False
-        ).add_to(map) 
+    def add_geojson_tooltip(self, geo_data, df, map):
+        for feature in geo_data["features"]:
+            province = feature["properties"]["shapeName"]
+
+            row = df[df["Province"] == province]
+            if not row.empty:
+                feature["properties"]["Number of Languages"] = int(
+                    row["Number of Languages"].iloc[0]
+                )
+            else:
+                feature["properties"]["Number of Languages"] = 0
+        folium.GeoJson(
+                geo_data,
+                style_function=lambda feature: {
+                    "fillColor": "transparent",
+                    "color": "black",
+                    "weight": 1
+                },
+                highlight_function=lambda feature: {
+                    "weight": 3,
+                    "color": "yellow"
+                },
+                tooltip=folium.GeoJsonTooltip(
+                fields=["shapeName", "Number of Languages"],
+                aliases=["Province:", "Number of Languages:"]
+                )
+        ).add_to(map)
+    def search_for_language(self, df, map: folium.Map):
+        options = ['All languages'] + df['language'].dropna().unique().tolist()
+        selected_language = st.sidebar.selectbox(
+        "Search for a language",
+        options,
+        help = "Select a language to jump to a language on the map."
+        )
+        if selected_language != "All languages":
+            df_to_plot = df[df["language"] == selected_language]
+        else:
+            df_to_plot = df     
+        for _, row in df.iterrows():
+            is_selected = (
+                selected_language != "All languages"
+                and row["language"] == selected_language
+            )
+
+            color = "red" if is_selected else "white"
+            radius = 10 if is_selected else 4
+            cluster = MarkerCluster(
+                name="Languages",
+                disableClusteringAtZoom=10,
+                icon_create_function=self.icon_create_function
+            ).add_to(map)
+            folium.CircleMarker(
+                location=[row["latitude"], row["longitude"]],
+                radius=radius,
+                color=color,
+                fill=True,
+                fill_color=color,
+                fill_opacity=1.0,
+                popup=row["language"]
+            ).add_to(cluster)
+            if selected_language != "All languages":
+                bounds = df_to_plot[["latitude", "longitude"]].values.tolist()
+                latitude = bounds[0][0]
+                longitude = bounds[0][1]
+
+                map.location = [latitude, longitude]
+         
+            else:
+                    pass
+        st.success(f'Showing {selected_language} on the map...')
+
         
-    
-        
+
             
         
+            
+                
+            
 
-  
     
+        

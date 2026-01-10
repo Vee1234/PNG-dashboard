@@ -6,7 +6,7 @@ from Processor import Processor
 def main():
     visualiser = Visualiser()
     data_loader = DataLoader()
-    analyser = Analyser(None)
+    analyser = Analyser()
     processor = Processor()
     # """ 
     # language_location_data = data_loader.load_data_from_json("data/PNG_all_languages_coordinate_data.geojson")
@@ -69,24 +69,31 @@ def main():
     #language_speaker_data = processor.replace_regex_character(language_speaker_data, '[\u2012\u2013\u2014]', '-')
     #language_speaker_data = processor.replace_regex_character(language_speaker_data, '[\u00A0\u202F\u2007]', ' ')
     language_speaker_data = language_speaker_data.apply(processor.clean_speaker_number, axis=1)
-    language_speaker_data = language_speaker_data.apply(analyser.calculate_source_confidence, axis=1)
+    #language_speaker_data = language_speaker_data.apply(analyser.calculate_source_confidence, axis=1)
     language_speaker_data = language_speaker_data.apply(analyser.calculate_min_and_max_for_not_ranges, axis=1)
     data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
     
+   
     language_speaker_data = processor.create_plotting_data_column(language_speaker_data)
-    #language_speaker_data = processor.create_tooltip_column_for_barchart(language_speaker_data)
+
+    language_speaker_data = processor.create_tooltip_column_for_barchart(language_speaker_data)
     data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
+    
+    
     
 #in some cases, wiki data not loading
 #andai and meakambut do not have figures n the df even though there is a figure on the endangered languages website- why?
 
     visualiser.show_title("Language Speaker Data Visualisation for Papua New Guinea")
-    map = visualiser.create_map(language_speaker_data, location= analyser.midpoint_coordinates(language_speaker_data), zoom_start=6.5)
-    cluster = visualiser.show_cluster(map, language_speaker_data)
-    
-    visualiser.display_filtered_map(language_speaker_data, cluster)
-
-    visualiser.display_map(map)
+    boundaries_data = data_loader.load_data_from_json('assessment-2/data/geoBoundaries-PNG-ADM1.geojson')
+    filter_map = visualiser.create_map("Geographical Speaker Distribution", "Hover over each point to learn more about the language.", location= (-5, 149), zoom_start=6.5)
+    filtered_df = visualiser.display_filtered_map(language_speaker_data, filter_map)
+    visualiser.search_for_language(language_speaker_data, filter_map)
+    visualiser.display_map(filter_map, 'filtered_language_map.html')
+    choropleth_map = visualiser.create_map("Choropleth Map Trial", "A trial of choropleth map", location= (-5, 149), zoom_start=6)
+    df = analyser.build_province_language_mapping(boundaries_data, language_speaker_data)
+    visualiser.trial_choropleth(boundaries_data, df, choropleth_map)
+    visualiser.display_map(choropleth_map,'choropleth_map.html')
     visualiser.show_logarithmic_bar_graph(language_speaker_data)
    
     
