@@ -5,13 +5,9 @@ numpy
 streamlit-folium
 altair
 requests
-hashlib
-pathlib
-time 
-json
-bs4
+beautifulsoup4
 shapely
-re
+
 
 
 
