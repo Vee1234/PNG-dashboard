@@ -201,14 +201,7 @@ class Visualiser:
         
 
     def show_logarithmic_bar_graph(self, df: pd.DataFrame):
-        #df_plot = df[df["plotting_data"].notna()]
-        df_plot = df.copy()
-
-        df_plot["plotting_data"] = pd.to_numeric(
-            df_plot["plotting_data"], errors="coerce"
-        )
-        df_plot = df_plot[df_plot["plotting_data"].notna()]
-        df_plot = df_plot[df_plot["plotting_data"] > 0]
+        df_plot = df[df["plotting_data"].notna()]
         st.header("Number of Speakers per Language")
         st.write("Bar chart showing the number of speakers for each language on a logarithmic scale. Languages marked in red are classified as extinct.")
         
