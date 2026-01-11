@@ -256,7 +256,7 @@ class Visualiser:
                 color=self.assign_colour_based_on_speaker_number(df, idx),
                 tooltip= folium.Tooltip(self.structure_popup(row), max_width=800),
                 radius=15000,
-                stroke = False,
+                stroke = True,
                 fill = True,
                 opacity = 1,
             ).add_to(cluster)
