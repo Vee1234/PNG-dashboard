@@ -224,10 +224,10 @@ class Visualiser:
                     alt.Tooltip("language:N", title="Language"),
                     alt.Tooltip("bar_chart_tooltip_value:N", title="Actual speakers"),
                 ]
-            )
+            ).properties(height=min(25 * len(df_plot), 3000))
         )
 
-        st.altair_chart(chart, width = 'stretch')
+        st.altair_chart(chart, width= 'stretch')
 
     def assign_colour_based_on_speaker_number(self, df, idx) -> pd.DataFrame:
         speaker_number = df.at[idx, 'plotting_data'] 
