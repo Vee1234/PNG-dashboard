@@ -9,7 +9,6 @@ def main():
     data_loader = DataLoader()
     analyser = Analyser()
     processor = Processor()
-    alt.data_transformers.disable_max_rows()
     # """ 
     # language_location_data = data_loader.load_data_from_json("data/PNG_all_languages_coordinate_data.geojson")
     # df = processor.convert_json_to_df(language_location_data, 'features')

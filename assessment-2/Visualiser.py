@@ -213,7 +213,7 @@ class Visualiser:
                 x=alt.X(
                     "plotting_data:Q",
                     scale=alt.Scale(type="log"),
-                    title="Number of speakers (log scale)"
+                    title="Number of speakers (log scale)",
                     stack=None
                 ),
                 color=alt.condition(
