@@ -346,7 +346,7 @@ class Visualiser:
                 and row["language"] == selected_language )
 
             color = "red" if is_selected else "white"
-            radius = 15 if is_selected else 1
+            radius = 10 if is_selected else 1
 
             cluster = MarkerCluster(
                 name="Languages",
@@ -369,6 +369,7 @@ class Visualiser:
                 latitude = bounds[0][0]
                 longitude = bounds[0][1]
                 map.location = [latitude, longitude]
+                
          
             else:
                     pass
