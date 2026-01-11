@@ -244,7 +244,7 @@ class Visualiser:
             return "yellow"
         elif 1000 <= speaker_number < 10000:
             return "orange"
-        elif speaker_number >= 100000:
+        elif 10000<= speaker_number >= 100000:
             return "red"
         else:
             return "darkred"
@@ -369,7 +369,7 @@ class Visualiser:
                 latitude = bounds[0][0]
                 longitude = bounds[0][1]
                 map.location = [latitude, longitude]
-                
+
          
             else:
                     pass
