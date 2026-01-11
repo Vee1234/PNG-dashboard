@@ -350,7 +350,7 @@ class Visualiser:
 
             cluster = MarkerCluster(
                 name="Languages",
-                disableClusteringAtZoom=10,
+                disableClusteringAtZoom=9,
                 icon_create_function=self.ICON_CREATE_FUNCTION
             ).add_to(map)
 
