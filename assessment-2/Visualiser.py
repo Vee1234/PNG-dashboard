@@ -214,6 +214,7 @@ class Visualiser:
                     "plotting_data:Q",
                     scale=alt.Scale(type="log"),
                     title="Number of speakers (log scale)"
+                    stack=None
                 ),
                 color=alt.condition(
                     alt.datum.vitality_status == "extinct",
