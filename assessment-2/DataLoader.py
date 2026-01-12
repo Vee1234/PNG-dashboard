@@ -30,6 +30,13 @@ class DataLoader:
         df = pd.read_csv(data_address)
         return df
     
+    def add_new_row_to_dataframe(self, df: pd.DataFrame, new_row: dict) -> pd.DataFrame:
+        '''Adds a new row to the DataFrame and writes the updated DataFrame to a CSV file.'''
+        new_row_df = pd.DataFrame([new_row])
+        updated_df = pd.concat([df, new_row_df], ignore_index=True)
+        self.write_df_to_csv(updated_df, 'data/language_speaker_data.csv')
+        return updated_df
+    
     def cache_path(self, url:str):
         '''Generates a cache file path based on the MD5 hash of the URL.'''
         url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()
