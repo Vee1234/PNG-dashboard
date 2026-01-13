@@ -1,0 +1,21 @@
+Province,Number of Languages,Languages List
+Central Province,8,"['Tauade', 'Fuyug', 'Mountain Koiali', 'Grass Koiari', 'Koitabu', 'Barai', 'Kunimaipa', 'Tok Pisin']"
+Chimbu (Simbu) Province,7,"['Golin', 'Sinasina', 'Salt-Yui', 'Kuman', 'Dom', 'Nomane', 'Chuave']"
+East New Britain Province,11,"['Sulka', 'Kol', 'Taulil', 'Butam', 'Unserdeutsch', 'Qaqet', 'Kairak', 'Ura', 'Mali', 'Simbali', 'Makolkol']"
+East Sepik Province,34,"['Taiap', 'Papi', 'Yerakai', 'Kwoma-Manambu Pidgin', 'Lembena', 'Nete', 'Bisorio', 'Angoram', 'Chambri', 'Tabriak', 'Yimas', 'Murik', 'Kopar', 'Boikin', 'Ngala', 'Ambulas', 'Hanga Hundi', 'Manambu', 'Yalaku', 'Sengo', 'Koiwat', 'Iatmul', 'Keak', 'Sos Kundi', 'Burui', 'Gaikundi', 'Awiakay-Karimba', 'Tapei', 'Nanubae-Imangae', 'Andai', 'Meakambut', 'Yawiyo', 'Pei', 'Walio']"
+Eastern Highlands Province,27,"['Kambaira', 'Binumarien', 'South Tairora', 'North Tairora', 'Awiyaana', 'Usarufa', 'Oweina', 'Awa', 'Gadsup', 'Agarabi', 'Gimi (Eastern Highlands)', 'Fore', 'Dano', 'Tokano', 'Alekano', 'Siane', 'Yaweyuha', 'Benabena', 'Yagaria', 'Kanite', 'Keyagana', 'Kamano', 'Inoke-Yate', 'Abaga', 'Kenati', 'Baruya', 'Simbari']"
+Enga Province,2,"['Enga', 'Ipili']"
+Gulf Province,13,"['Kibiri', 'Kaki Ae', 'Karami', 'Purari', 'Pawaia', 'Folopa', 'Northeast Kiwai', 'Morigi', 'Ankave', 'Tainae', 'Akoye', 'Ipiko', 'Minanibai-Foia Foia']"
+Hela Province,3,"['Bogaya', 'Duna', 'Huli']"
+Jiwaka Province,6,"['Maring', 'Narak', 'Kandawo', 'Wahgi', 'Nii', 'North Wahgi']"
+Madang Province,116,"['Lilau', 'Monumbo', 'Ma', 'Bonkiman', 'Gende', 'Isabi', 'Biyom', 'Tauya', 'Dumpu', 'Kou', 'Asas', 'Sausi', 'Kesawai', 'Bai-Maclay', 'Dumun', 'Yabong', 'Saep', 'Ganglau', 'Pulabu', 'Kolom', 'Siroi', 'Arawum', 'Lemio', 'Sumau', 'Sop', 'Danaru', 'Urigina', 'Kwato', 'Duduela', 'Yangulam', 'Uya', 'Ogea', 'Sgi Bara', 'Rerau', 'Anjam', 'Bongu', 'Male', 'Sam', 'Yamben', 'Amaimon', 'Bargam', 'Pal', 'Kobol', 'Kare', 'Saruga', 'Bagupi', 'Mawan', 'Utu', 'Silopi', 'Murupi', 'Samosa', 'Wamas', 'Mosimo', 'Nobonob', 'Gal', 'Wagi', 'Baimak', 'Rempi', 'Garus', 'Yoidik', 'Rapting', 'Matepi', 'Nake', 'Sihan (Gum)', 'Amele', 'Gumalu', 'Bau', 'Panim', 'Isebe', 'Munit', 'Kein', 'Girawa', 'Gavak', 'Yarawata', 'Parawen', 'Ukuriguma', 'Usan', 'Karen', 'Yaben', 'Mala', 'Maiani', 'Maia', 'Miani', 'Barem', 'Manep', 'Mokati', 'Pamosu', 'Mawak', 'Hember Avu', 'Kowaki', 'Mauwake', 'Bepour', 'Moere', 'Korak', 'Waskia', 'Mum', 'Sirva', 'Gants', 'Kulsab', 'Aisi', 'Magi', 'Apali', 'Manat', 'Mand', 'Nend', 'Magiyi', 'Utarmbung', 'Wadaginam', 'Anam', 'Moresada', 'Anamuxra', 'Kobon', 'Tai', 'Kalam', 'Haruai', 'Pinai-Hagahai']"
+Manus Province,11,"['Wuvulu-Aua', 'Pak-Tong', 'Mokerang', 'Loniu', 'Sori-Harengan', 'Bipi', 'Nyindrou', 'Tulu-Bohuai', 'Mondropolon', 'Khehek', 'Likum']"
+Milne Bay Province,1,['Yele']
+Morobe Province,14,"['Yopno', 'Waffa', 'Wasembo', 'Biangai', 'Amam', 'Weri', 'Angaataha', 'Yagwoia', 'Kawacha', 'Safeyoka', 'Kamasa', 'Susuami', 'Hamtai', 'Menya']"
+New Ireland Province,1,['Kuot']
+Northern (Oro) Province,9,"['Moikodi', 'Aneme Wake', 'Nawaru', 'Bariji', 'Yareba', 'Biage', 'Ömie', 'Ese', 'Namiae']"
+Southern Highlands Province,11,"['Fasu', 'Wiru', 'Dadibi', 'Imbongu', 'Samberigi', 'West Kewa', 'Erave', 'East Kewa', 'Angal Heneng', 'Angal', 'Angal Enen']"
+West New Britain Province,2,"['Anem', 'Pele-Ata']"
+West Sepik (Sandaun) Province,26,"['Pyu', 'Muno', 'Asabano', 'Yale', 'Odiai', 'Oksapmin', 'Ngalum', 'Mian', 'Suganga', 'Telefol', 'Urapmin', 'Tifal', 'Amto', 'Siawi', 'Kwomtari', 'Nai', ""I'saka"", 'Uni', 'Bouni-Bobe', 'Bauni', 'Puare', 'Rawo', 'Leitre', 'Wutung', 'Vanimo', 'Tuwari']"
+Western Highlands Province,4,"['Umbu-Ungu', 'Bo-Ung', 'Melpa', 'Kyaka']"
+Western Province,35,"['Dibiyaso', 'Tabo', 'Waboda', 'Southern Kiwai', 'Bamu', 'Idi-Taeme', 'Agob-Ende-Kawam', 'Turumsa', 'Doso', 'Bimin', 'Faiwol', 'Setaman', 'Ninggerum', 'Yonggom', 'Fembe', 'Odoodee', 'Konai', 'Kubo', 'Gobasi', 'Samo', 'Mubami', 'Mahigi', 'Hoyahoya-Matakaia', 'Hoia Hoia-Ukusi-Koperami', 'Abom', 'Bitur', 'Baramu', 'Were', 'Makayam', 'Zimakani', 'Kuni-Boazi', 'Suki', 'Gogodala', 'Waruna', 'Ari']"

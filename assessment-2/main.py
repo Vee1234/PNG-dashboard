@@ -63,7 +63,7 @@ def main():
     # """
 
     #DATA CLEANING
-    language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data_clean.csv')   
+      
     #language_speaker_data = language_speaker_data.apply(processor.clean_speaker_number, axis=1)
     #language_speaker_data = language_speaker_data.apply(analyser.calculate_source_confidence, axis=1)
    
@@ -71,6 +71,7 @@ def main():
 
     #language_speaker_data = analyser.create_tooltip_column_for_barchart(language_speaker_data)
     #data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
+    language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data_clean.csv') 
     boundaries_data = data_loader.load_data_from_json('assessment-2/data/geoBoundaries-PNG-ADM1.geojson')
     df = analyser.build_province_language_mapping(boundaries_data, language_speaker_data)
     data_loader.write_df_to_csv(df, 'assessment-2/data/province_language_mapping.csv')
