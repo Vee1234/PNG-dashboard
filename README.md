@@ -1,7 +1,7 @@
-## Island Dashboard
+# Island Dashboard Documentation
 ## Introduction, Scope and Context
 ### Introduction
-With over 800 languages spoken by a population of just over 10 million people, Papua New Guinea is the most linguistically rich country in the world. I built a Streamlit-powered data dashboard to enable interactive exploration of language distribution and speaker populations across Papua New Guinea through three complementary visualisations. First, a geographic map displays the epicentres of individual languages, colour-coded by number of speakers. Interactive tooltips provide language-specific metadata, and users can filter by speaker population or search for individual languages. Second, a choropleth map shows the number of distinct languages spoken within each administrative province, with hover-based interaction revealing provincial counts. Third, a logarithmically scaled bar chart presents speaker populations for all languages, with extinct languages visually distinguished.
+With over 800 languages spoken by a population of just over 10 million people [1], Papua New Guinea is the most linguistically rich country in the world. I built a Streamlit-powered data dashboard to enable interactive exploration of language distribution and speaker populations across Papua New Guinea through three complementary visualisations. First, a geographic map displays the epicentres of individual languages, colour-coded by number of speakers. Interactive tooltips provide language-specific metadata, and users can filter by speaker population or search for individual languages. Second, a choropleth map shows the number of distinct languages spoken within each administrative province, with hover-based interaction revealing provincial counts. Third, a logarithmically scaled bar chart presents speaker populations for all languages, with extinct languages visually distinguished.
 
 **The dashboard is deployed on StreamLit and can be accessed at this URL: https://vee1234-png-dashboard-assessment-2main-szkkgy.streamlit.app/**
  The underlying dataset was built on an established data set, wth significant supplementation from data scraping and derived data. The final dataset is stored in *language_speaker_number_clean.csv*. Single-responsibility classes encapsulate methods, with some classes having their own class variables.
@@ -19,7 +19,7 @@ The problem addressed by this dashboard was defined through a review of existing
 
 This research informed my problem definition; I decided to target the gaps in **Geographical Representation**
 
-Two existing projects in this area are Glottolog, an online bibliography and classification for the world's languages, and the Endangered Languages Project. Both projects offer map-based language visualisations, but do not allow the user to remain in the map context whilst viewing speaker number. Furthermore, these systems do not provide data or visualisations at administrative levels, limiting insight into language hotspots and the effects of geographic isolation on language density.
+Two existing projects in this area are Glottolog[2], an online bibliography and classification for the world's languages, and the Endangered Languages Project[3]. Both projects offer map-based language visualisations, but do not allow the user to remain in the map context whilst viewing speaker number. Furthermore, these systems do not provide data or visualisations at administrative levels, limiting insight into language hotspots and the effects of geographic isolation on language density.
 
 My dashboard combines geographical information with speaker and language numbers and presents how language distribution varies by region.
 
@@ -32,7 +32,7 @@ Provenance analysis aided me to determine which resources were most suitable for
 | **Ethnologue** (not used directly)       | None                                                                               | Expert-curated and widely cited in academic literature.                                                                                                             | Compiled by specialists with extensive linguistic coverage.                                                                                                   | Regularly updated.                                 | Paywalled, preventing verification and reproducibility.                                                        | Would provide comprehensive speaker and vitality data, but access restrictions prevent direct use.                                                     | Restricted access limits transparency and reuse.                                |
 | **Endangered Languages Project (ELCat)** | Speaker numbers and vitality status for endangered, dormant, and extinct languages | Maintained by the University of Hawaiʻi at Mānoa; academically curated secondary source.                                                                            | Aggregates vitality data from multiple expert sources and publications.                                                                                       | Actively updated.                                  | Coverage limited to endangered languages only; not a complete language catalogue.                              | Valuable for speaker numbers and vitality data, but insufficient as a standalone source.                                                               | Publicly accessible; data not provided in bulk downloadable form.               |
 | **Wikipedia**                            | Speaker numbers and vitality status (fallback cases)                               | Community-curated tertiary source with low academic credibility.                                                                                                    | Aggregates information from secondary sources, often Ethnologue, without guaranteed traceability.                                                             | Update frequency is inconsistent.                  | High uncertainty due to indirect sourcing and lack of verification; error may propagate from upstream sources, resulting in an incorrect speaker number value. | Used only when no other data were available, improving completeness at the cost of increased uncertainty.                                              | Freely accessible; ethical use requires explicit acknowledgment of limitations. |
-| **APiCS**                                | Speaker numbers for pidgin and creole languages                                    | Edited by academic linguists and supported by major research institutions.                                                                                          | Demographic and linguistic data compiled by domain experts; originally published as a peer-reviewed volume.                                                   | Continuously maintained.                           | Limited to pidgin and creole languages; not representative of all language types.                              | Provides reliable, expert-approved speaker estimates for a specific language class.                                                                    | Freely accessible and suitable for scholarly use.                               |
+| **APiCS** [4]                                | Speaker numbers for pidgin and creole languages                                    | Edited by academic linguists and supported by major research institutions.                                                                                          | Demographic and linguistic data compiled by domain experts; originally published as a peer-reviewed volume.                                                   | Continuously maintained.                           | Limited to pidgin and creole languages; not representative of all language types.                              | Provides reliable, expert-approved speaker estimates for a specific language class.                                                                    | Freely accessible and suitable for scholarly use.                               |
 
 ## Initial Data Cleaning 
 The first resource I required was a comprehensive list of languages with their respective coordinates. I obtained this from GeoJSON which I copied from the Glottolog website. I retrieved the data using the *load_data_from_json* function in the *DataLoader* class shown below:
@@ -59,16 +59,12 @@ In preparation for data scraping, I tested a few of the links in  *language_loca
  ### Ethics
  In the *language_location_df* a list of links is listed for each language. As shown above, the three websites which consistently displayed speaker numbers were EndangeredLanguages.com, wikipedia.com and apics-online.info. To maximise data coverage, I could consider scraping data from all of these sources. I reviewed the Terms of Use and the robots.txt for each website to determine whether scraping was allowed and if so, under what conditions.
 
- With a strong focus on preserving and protecting indigenous cultures, EndangeredLanguages.com required its users to 'respect Indigenous Speakers' rights and decisions about their languages, cultures and knowledge' and 'approach all languages and materials with respect, responsibility, and care'. Furthermore, scraping for the purpose of training or fine tuning AI models is explicitly proibited. Wikipedia.com welcome friendly, low-speed bots welcome to view article pages, but not dynamically generated pages. I could not find any scraping guidance for apics-online.info, therefore I tried to keep my scraping algorithm as polite as possible. I cached each website I accessed (each website's cache can be found in the cache folder) to minimise request rate and set retries to occur every 2 seconds, putting the request rate at 0.5 seconds, well below Wikipedia's limit. Finally, I created a User Agent header to reveal my scraping bot as a custom, academic one and to prevent retrieval failures or being blocked by the website. 
+ With a strong focus on preserving and protecting indigenous cultures, EndangeredLanguages.com required its users to 'respect Indigenous Speakers' rights and decisions about their languages, cultures and knowledge' and 'approach all languages and materials with respect, responsibility, and care'[5]. Furthermore, scraping for the purpose of training or fine tuning AI models is explicitly proibited. Wikipedia.com welcome friendly, low-speed bots welcome to view article pages, but not dynamically generated pages[6]. I could not find any scraping guidance for apics-online.info, therefore I tried to keep my scraping algorithm as polite as possible. I cached each website I accessed (each website's cache can be found in the cache folder) to minimise request rate and set retries to occur every 2 seconds, putting the request rate at 0.5 seconds, well below Wikipedia's limit. Finally, I created a User Agent header to reveal my scraping bot as a custom, academic one and to prevent retrieval failures or being blocked by the website. 
 
- (self.HEADERS insert here)
 ### Algorithm Structure
 I designed an algorithm to ethically and efficiently extract data from a specified website domain for each language, using the BeautifulSoup library.
 
 This algorithm powers the code in the master function, *orchestrate_data_scraping_per_domain_name*, in *DataLoader*. 
-
-
-(orchestrate_data_scraping_...)
 
 The master function calls other methods with specific roles in the data scraping process. The *get_page* method hadnles retrieval and caching of website html, *scrape_data_in_class_field_from_website* retrieves the speaker number or vitality status from this html. Overall, *orchestrate_data_scraping* handles the execution of the algorithm, as well as populating rows in the dataframe with the correct values. 
 
@@ -100,7 +96,7 @@ The speaker_value_raw column contained a wide variety of formats and structures,
 
 ### Speaker Number Cleaning Function
 The *clean_speaker_number* function is designed to standardise and convert raw speaker number data from heterogeneous formats into a numeric format suitable for analysis. It handles missing, approximate, range-based, qualitative, and cited speaker counts. The function populates several fields in the dataset, including speaker_number_numeric, speaker_number_min, speaker_number_max, speaker_number_type, and speaker_number_year, to capture the variety and uncertainty in the original data.
-Firstly, the raw speaker number retrieved from the speaker_number_raw column is cleaned to remove commas, em-dashes and new-line characters which would interfere with numerical analysis. This is performed by the *replace_character* method inside of the *clean_speaker_function*. (insert image)
+Firstly, the raw speaker number retrieved from the speaker_number_raw column is cleaned to remove commas, em-dashes and new-line characters which would interfere with numerical analysis. This is performed by the *replace_character* method inside of the *clean_speaker_function*.
 
 The following cases are then handled:
 1. Missing data: If the speaker_number_raw value is missing (NaN), the function assigns None to indicate an absent or unknown speaker count.
@@ -120,12 +116,10 @@ The function uses pandas (pd.isna) for handling missing values, and regular expr
 The function converts human-readable estimates into numeric values using dictionaries for multipliers and quantifiers which are stored as class variables.
 
 #### Statistical considerations
-The function emphasises capturing uncertainty. Following the methodological guidance for self-selected interval data (Angelov et al., 2024), ranges were treated as interval-censored rather than collapsed into exact values. The function preserves ranges (min/max) and explicitly marks estimates or qualitative values. It also avoids misleading precision by not rounding or approximating values unnecessarily; if the raw data is approximate, the output retains that uncertainty in the type and min/max fields. Finally, the function ensures ethical representation of data: by distinguishing between exact counts, estimates, and ranges, it prevents misrepresentation of language vitality or speaker populations, which is particularly important for endangered or poorly documented languages.  This aligns with best practices in linguistics and demographic analysis, where speaker counts may be uncertain, approximate, or based on historical sources. 
+The function emphasises capturing uncertainty. Following the methodological guidance for self-selected interval data (Angelov et al., 2024)[7], ranges were treated as interval-censored rather than collapsed into exact values. The function preserves ranges (min/max) and explicitly marks estimates or qualitative values. It also avoids misleading precision by not rounding or approximating values unnecessarily; if the raw data is approximate, the output retains that uncertainty in the type and min/max fields. Finally, the function ensures ethical representation of data: by distinguishing between exact counts, estimates, and ranges, it prevents misrepresentation of language vitality or speaker populations, which is particularly important for endangered or poorly documented languages.  This aligns with best practices in linguistics and demographic analysis, where speaker counts may be uncertain, approximate, or based on historical sources. 
 
 
-## Methodology and Data Analysis (30%) 
-You should talk about and demonstrate your analysis methods and approaches to visualisation here. While the quality of data available will depend on your project, you should be able to demonstrate statistics at the level of collections and subcollections. You should consider what types of visualisations will best convey your insights, and how these will be accessible to your audience. You should also ensure your work is reproducible and that algorithms or formulas used for calculations are documented. 
-
+## Methodology and Data Analysis 
 ### Exploratory Visualisation
 
 I created exploratory visualisations to guide analysis decisions, prioritising user experience and accurate representation of data and uncertainties.
@@ -150,8 +144,8 @@ Because a large proportion of languages are concentrated in the north-west of Pa
 ### Deriving the Plotting Data and Bar Chart Tooltip Value columns
 To display a bar chart, I needed to assign a single numerical speaker number to each language. This was a problem for languages whose speaker number was given as a numerical or qualitiative range- how could I derive a single numerical value while still preserving and presenting the uncertainty in speaker number? 
 
-To simultaneously provide a clear visual representation of speaker number and not mislead the dashboard user, I decided to expose one value in a tooltip, called *bar_chart_tooltip_value*, while using a derived variable, called *plotting_data* in any underlying data analysis. The values were stored in separate columns in the DataFrame because the tooltip cannot dynamically compute the appropriate value for each language. The *create_plotting_data_column* is shown below: 
-(plotting data function)
+To simultaneously provide a clear visual representation of speaker number and not mislead the dashboard user, I decided to expose one value in a tooltip, called *bar_chart_tooltip_value*, while using a derived variable, called *plotting_data* in any underlying data analysis. The values were stored in separate columns in the DataFrame because the tooltip cannot dynamically compute the appropriate value for each language. 
+
 This function assigns a *plotting_data* value to each language using the following rules: 
 | Case                     | How *plotting_data* is calculated                                                                 |
 |---------------------------|--------------------------------------------------------------------------------------------------|
@@ -196,10 +190,8 @@ Considering these bounds results in a more accurate filtering system.
 ### Mapping Languages to Province using shapely
 A key insight derivable from the dataset is the distribution of languages across provinces. A choropleth map with a legend most effectively conveys this pattern, as the colour shading means relative language density is immediately apparent to the user. 
 
-The GeoJSON file containing Papua New Guinea's provincial boundaries was downloaded from geoBoundaries.org. In the *build_province_language_mapping* method below, the contents of the GeoJSON were parsed as a parameter to boundaries_data while language_speaker_data was parsed to language_df.
+The GeoJSON file containing Papua New Guinea's provincial boundaries was downloaded from geoBoundaries.org. In the *build_province_language_mapping* method, the contents of the GeoJSON were parsed as a parameter to boundaries_data while language_speaker_data was parsed to language_df.
 (build_province_language_mapping)
-
-
 
 This function demonstrates a clear analysis method by gathering point-level language data into province-level collections and subcollections using a point-in-polygon approach.
 Because province membership is determined by an explicit, deterministic point-in-polygon rule, the collection process is fully reproducible: identical inputs will always yield the same province-level language counts, allowing the analysis to be independently replicated.
@@ -219,8 +211,6 @@ which is located in the *display_filtered_map_ method.
 
 Finally, to reduce noise on the map I implemented clusters. Cluster circles change in size and colour based on the number of children they have in an intuitive way, with large, red clusters having the most and small, yellow ones having the least. To make the size of clusters change continuously, I set the cluster radius to `size = 20 + Math.log(count) * 15`. In this way, cluster circle size is more representative of the number of children, making cluster size a more meaningful cue to the user. The function that determines the colour and size of a cluster is written in HTML and assigned to the class variable *ICON_CREATE_FUNCTION*. It is parsed as a parameter when a new cluster in instantiated in *display_filtered_map*.
 
-
-
 #### Choropleth Map
 
 For my second visualisation, I wanted to investigate the relationship between a given linguistic variable over political boundaries. I created a Folium.Chloropleth object, parsing the following parameters:  
@@ -236,18 +226,13 @@ Finally, I wanted to create a visualisation that would enable users to visually 
 
 The values in the *plotting_data* column are used as frequency values. I chose to place languages on the Y axis and number of speakers on the x axis as it means the user can continue to scroll downwards through the dashboard as they have been doing for the other visualisations, improving accessibility. Using a logarithmic scale allows languages with widely varying speaker numbers to be compared meaningfully- pattersn across languages become immediately visible. Extinct languages are highlighted in red to draw attention to them and remain consistent with the colour scheme used in the other visualisations. The benefit of setting the *plotting_data* value of extinct and dormant languages to 0 is evident: the bars can actually be seen.
 
-why altair- compatible with df, declarative- focus on what rather than how, interactive capabilities
-
 #### Key Modules and Techniques
 I chose Folium for its versatile marker options, including circles, markers, and circle markers, which facilitated clear plotting of points on the map. Creating points and clusters was straightforward and fully reproducible. Additionally, the ability to convert raw HTML into Folium elements enabled customisation of the map to effectively display the data. Finally, Folium integrates seamlessly with Streamlit, meaning I could embed a Folium.Map object into Streamlit without any conversion.
 
 I chose Altair to create the bar chart because it works seamlessly with DataFrames, allowing direct mapping of columns to visual elements and it supports built-in interactivity, such as tooltips and conditional formatting. Its declarative syntax focuses on what to display rather than how to draw it, which improves efficiency for simple graphs though it meant I had less control over the design. A more eye-catching visualisation could have been made using Plotly.
 
 
-## Design and Implementation (30%) 
-
-You should show how you constructed the dashboard, demonstrating both the visual and code design. A dashboard implies either interactivity or up-to-date data; ideally, you should include both. This means your dashboard should be interactive and responsive, accommodating different types of users. It should also be updatable, should new data be available. Version control should be used to track the development of new features against documented requirements. You should show knowledge of the classes and methods of libraries used, extending functionality where appropriate.
-I displayed my visualisations using the Streamlit framework. 
+## Design and Implementation
 
 ### Interactivity
 I have implemented interactivity into this dashboard in four ways.
@@ -320,15 +305,57 @@ The LanguageEntry dataclass acts as a template for a row in `language_speaker_da
 
 ### Version Control
 I have demonstrated exemplary version control in this assignment by making regular and meaningful commits, which can be seen from my commit history, located on this repo's page on github.com. Each commit documents a clear change: e.g. Corrected ordering of default and non-default fields, Inverted the colour scheme outlined in the html.
-
 However, my use of version control could be improved by only committing a single change at a time, to trace bugs more easily in the future.
 
 
+## Recommendation, Reflection and Conclusions  
+In this project, I used a range of digital technology solution development techniques and tools such as a dashboard framework (Streamlit), Git version control and a wide variety Python libraries for data handling and visualisation, including Folium, Altair, numpy, pandas and BeautifulSoup (K5). 
+
+I clearly documented how I approached each part of the digital and technology solution life cycle in this report: research, data collection, data cleaning, design and implementation. Furthermore I demonstrated version-controlled development throughout this project, with each commit representing a meaningful part of the life cycle. Additionally, I used OOP to structure my code and each of my single-responsiblity classes represent one stage of the digital and technology solution life cycle (K6).
+
+I handled GeoJSON files, extracting their contents, converting them to pandas DataFrames and writing them to csv files, which are easy to convert back into a DataFrame to perform operations on. Furthermore, I used dataclasses when I identified that data had to be standardised using a template, for example when adding new rows to the dictionary or when creating a dictionary that will store scraped data values (K12).
+
+I demonstrated the principles of data analysis by deriving fields from the data set, such as `plotting_value`, `bar_chart_tooltip_value` and `source_confidence`. I identified where uncertainties may be present in the data, quantified them and then propagated them: for example, I used `source_confidence` to suggest a range in which the true speaker number could be said to lie.  As I used standard libraries, my data visualisation methods are reproducible. My visualisations were data-driven- I considered **what** I wanted to show first, then how. Each visualisation tackles a particular part of the problem definition and gives insight into Papuan Languages at a national and provincial level (K13).
+
+In this report, I have presented the dashboard results in an accessible manner. I have carefully considered the best way to display my results in each section: through numbered lists to connect sequential points; in tables if explaining how variables may be treated differently by a single algorithm and by clearly signposting this report with headings and sub-headings (K17).
+
+I built an end-toend interactive dashboard, demonstrating design, implementation, debugging and functional completeness, as is evidenced by the final dashboard (S10).
+
+In my code, I have clearly documented functions, making consistent use of type hints and describing the overall purpose of a function as well as expected inputs and outputs. In this report, I have documented in detail the design ideas I had and the algorithms I used to create this dashboard (S13).
+
+Before performing data scraping or analysis, I reviewed the Terms of Use of each website to determine whether I could use the data. I then ensured I scraped politely, minimisng request rates and using headers (S15, B3).
+
+The dashboard is accessible to all users. Users do not require prior knowledge of the languages of Papua New Guinea to gain insights from it. I have made active efforts to ensure this, by for example, choosing to use a dropdown menu rather than solely a search bar to search for a language, as this would provide a non-technical user with a framework (B5).
 
 
 
+ **References**
 
-## Recommendation, Reflection and Conclusions (10%) 
-While this part alone is worth the least number of marks, this is critical for showing the learning that occurred during your work on the assignment, and effective completion of this section will allow you to get more marks in earlier sections. You should link your work to relevant knowledge, skills and behaviour from the apprenticeship, and ensure the marker has everything they need to use and evaluate your code.
+ [1] Forum, W.E., 2021. *These are the top ten countries for linguistic diversity*. Available at: <https://www.weforum.org/stories/2021/03/these-are-the-top-ten-countries-for-linguistic-diversity/> [Accessed 13 January 2026].
 
-For bar chart could have had a max speaker and min speaker bar for ranges.
+ [2] Glottolog, 2025. Hammarström, H., Forkel, R., Haspelmath, M. & Bank, S. *Glottolog 5.2*. Leipzig: Max Planck Institute for Evolutionary Anthropology. Available at: <http://glottolog.org> [Accessed 11 January 2026]. https://doi.org/10.5281/zenodo.15525265
+
+ [3] Endangered Languages Project, n.d. *About the catalogue*. Available at: <https://www.endangeredlanguages.com/about-catalogue> [Accessed 13 January 2026].
+
+ [4] APiCS, 2013. Michaelis, S.M., Maurer, P., Haspelmath, M. & Huber, M. (eds.) *Atlas of Pidgin and Creole Language Structures Online*. Leipzig: Max Planck Institute for Evolutionary Anthropology. Available at: <http://apics-online.info> [Accessed 21 December 2025].
+
+ [5]Endangered Languages Project, n.d. *Privacy Policy*. Available at: <https://www.endangeredlanguages.com/terms> [Accessed 13 January 2026].
+
+ [6] Wikipedia, 2026. *robots.txt – Wikimedia Foundation*. Available at: <https://en.wikipedia.org/robots.txt> [Accessed 13 January 2026].
+
+
+ [7] Angelov, A.G., Ekström, M., Puzon, K. et al., 2024. Quantile regression with interval-censored data in questionnaire-based studies. *Computational Statistics*, 39, pp.583–603. https://doi.org/10.1007/s00180-022-01308-2
+
+
+Kent Academic Repository, 2017. Jonathan, PhD. *Indicators of Status and Trends in Global Biological, Linguistic and Cultural Diversity*. Available at: <https://kar.kent.ac.uk/61424/1/164LOH%20Jonathan%20PhD%202017%20Indicators%20of%20Status%20and%20Trends%20in%20Global%20Biological%2C%20L.pdf> [Accessed 13 January 2026].
+
+
+Medium, 2021. Bouthemy, M., *How to find if a point is inside a polygon shape using Python*. Available at: <https://medium.com/@marin.bouthemy/how-to-find-if-a-point-is-inside-polygon-shape-using-python-5225f9b09c3> [Accessed 13 January 2026].
+
+Python Visualization, n.d. *Folium documentation*. Available at: <https://python-visualization.github.io/folium/latest/> [Accessed 13 January 2026].
+
+Runfola, D. et al., 2020. geoBoundaries: A global database of political administrative boundaries. *PLoS ONE*, 15(4), e0231866. https://doi.org/10.1371/journal.pone.0231866
+
+Vega-Altair, n.d. *Altair visualization documentation*. Available at: <https://altair-viz.github.io/> [Accessed 13 January 2026].
+
+World Bank / Humanitarian Data Exchange, n.d. *GeoBoundaries admin boundaries for Papua New Guinea*. Available at: <https://data.humdata.org/dataset/geoboundaries-admin-boundaries-for-papua-new-guinea> [Accessed 13 January 2026].

@@ -38,12 +38,8 @@ class DataLoader:
         with open(file_path, mode='a', newline='', encoding='utf-8') as file:
             writer = csv.DictWriter(file, fieldnames=entry.keys())
         
-        # Write the new row
         writer.writerow(entry)
 
-        updated_df = pd.concat([df, new_row_df], ignore_index=True)
-        self.write_df_to_csv(updated_df, 'data/language_speaker_data.csv')
-        return updated_df
     
     def cache_path(self, url:str):
         '''Generates a cache file path based on the MD5 hash of the URL.'''
