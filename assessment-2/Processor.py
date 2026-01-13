@@ -70,6 +70,7 @@ class Processor:
                 row["speaker_number_numeric"] = None
                 return row
             raw = str(raw).lower()
+            raw = self.replace_character(',', '', raw)
             raw = self.replace_character('[\u2012\u2013\u2014]', '-', raw)
             raw = self.replace_character('[\u00A0\u202F\u2007]', ' ', raw)
 

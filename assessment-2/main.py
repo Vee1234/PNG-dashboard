@@ -64,8 +64,6 @@ def main():
 
     #DATA CLEANING
     language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data_clean.csv')   
-    #language_speaker_data = processor.replace_regex_character(language_speaker_data, '[\u2012\u2013\u2014]', '-')
-    #language_speaker_data = processor.replace_regex_character(language_speaker_data, '[\u00A0\u202F\u2007]', ' ')
     #language_speaker_data = language_speaker_data.apply(processor.clean_speaker_number, axis=1)
     #language_speaker_data = language_speaker_data.apply(analyser.calculate_source_confidence, axis=1)
     #language_speaker_data = language_speaker_data.apply(analyser.calculate_min_and_max_for_not_ranges, axis=1)
