@@ -91,22 +91,22 @@ class Analyser:
         df["speaker_number_max"] = pd.to_numeric(df["speaker_number_max"], errors="coerce")
         df["speaker_number_numeric"] = pd.to_numeric(df["speaker_number_numeric"], errors="coerce")
 
-        # Case 1: range → midpoint
+        # Case 1: range - calculate midpoint
 
         df.loc[df["speaker_number_type"] == "range", "plotting_data"] = (
             (df["speaker_number_min"] + df["speaker_number_max"]) / 2
         )
+        df.loc[df["speaker_number_type"] == "qualitative range", "plotting_data"] = (
+        (df["speaker_number_min"] + df["speaker_number_max"])/ 2)
 
         # Case 2: extinct or dormant → value below minimum
         df.loc[df["vitality_status"].isin(["extinct", "dormant"]), "plotting_data"] = df["speaker_number_numeric"].min()-0.5
         
-
         # Case 3: exact → numeric
         df.loc[df["speaker_number_type"] == "estimate", "plotting_data"] = df["speaker_number_numeric"]
         df.loc[df["speaker_number_type"] == "exact", "plotting_data"] = df["speaker_number_numeric"]
         df.loc[df["speaker_number_type"] == "qualitative estimate", "plotting_data"] = df["speaker_number_numeric"]
-        df.loc[df["speaker_number_type"] == "qualitative range", "plotting_data"] = (
-            (df["speaker_number_min"] + df["speaker_number_max"])/ 2)
+    
     
         return df
 

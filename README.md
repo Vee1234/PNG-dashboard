@@ -111,7 +111,7 @@ The following cases are then handled:
 4. Approximate numbers: Values indicated with symbols such as ~ are treated as estimates. The numeric component is extracted, and the type is marked as "estimate".
 5. Upper-bound indicators: Phrases such as "less than X" or "fewer than X" are interpreted as ranges from 0 to the specified number, with the type "range" or "qualitative range" to reflect uncertainty.
 6. Explicit ranges: Values formatted as "min–max" are parsed into speaker_number_min and speaker_number_max fields, with type "range".
-7. Multipliers and quantifiers: Words like "thousand", "million", or qualitative quantifiers such as "dozen" are converted into numeric equivalents using predefined dictionaries, which are stored as class variables in the *Processor* class. This allows entries like "a few dozen" or "2–3 million" to be standardised.
+7. Multipliers and quantifiers: Words like "thousand", "million", or qualitative quantifiers such as "dozen" are converted into numeric equivalents using predefined dictionaries, which are stored as class variables in the *Processor* class. This allows entries like "a few dozen" or "2–3 million" to be standardised. The type is marked as "qualitative estimate".
 8. Fallback numeric extraction: For any remaining formats, the function attempts to extract the first numeric value as speaker_number_numeric and identifies additional numbers as potential years.
 9. Error handling: Any unexpected formats trigger a safety net, assigning None to numeric fields to prevent crashing or misinterpretation.
 
@@ -146,15 +146,45 @@ This exploration helped me decided which geographic and numerical visualisations
 
 ### Analysis
 ### Map Adjustment
-I used the midpoint
-This function calculates the geographic centre of the dataset by taking the midpoint between the minimum and maximum latitude and longitude values. This ensures that the map is centred on the full spatial extent of the languages rather than their average location. Because a large proportion of languages are concentrated in the north-west of Papua New Guinea, the mean coordinates were spatially skewed and unsuitable for map centring. Using the midpoints of the extrema provides a more balanced and representative map centre.
-### Deriving the Plotting Data and Tooltip Value columns
+I created the find_midpoint_coordinates function to find the geographical centre of all the coordinates in the dataset.
+(find_midpoint_coordinates)
+Because a large proportion of languages are concentrated in the north-west of Papua New Guinea, the mean coordinates were spatially skewed and unsuitable for map centring. Using the midpoints of the extrema provides a more balanced map centre.
+### Deriving the Plotting Data and Bar Chart Tooltip Value columns
+To display a bar chart, I needed to assign a single numerical speaker number to each language. This was a problem for languages whose speaker number was given as a numerical or qualitiative range- how could I derive a single numerical value while still preserving and presenting the uncertainty in speaker number? 
+
+To simultaneously provide a clear visual representation of speaker number and not mislead the dashboard user, I decided to expose one value in a tooltip, called *bar_chart_tooltip_value*, while using a derived variable, called *plotting_data* in any underlying data analysis. The values were stored in separate columns in the DataFrame because the tooltip cannot dynamically compute the appropriate value for each language. The *create_plotting_data_column* is shown below: 
+(plotting data function)
+This function assigns a *plotting_data* value to each language using the following rules: 
+| Case                     | How *plotting_data* is calculated                                                                 |
+|---------------------------|--------------------------------------------------------------------------------------------------|
+| Range                     | Midpoint of *speaker_number_min* and *speaker_number_max*                                         |
+| Extinct / Dormant         | Value slightly below the dataset minimum to distinguish these languages visually. If the value were set to 0, the bar would not appear.                 |
+| Exact counts              | Uses the numeric value directly                                                                 |
+| Estimates                 | Uses the processed numeric estimate                                                             |
+| Qualitative ranges        | Midpoint of inferred minimum and maximum values, consistent with numeric ranges                 |
+
+The purpose of *bar_chart_tooltip_value* is to ensure that users see the most informative value for each language. For example, the raw speaker value for Tok Pisin '3-5 million (estimated)' is much easier to understand than a speaker_number_min of 3000000 and a speaker_number_max of 5000000. *create_tooltip_column_for_bar_chart* takes in a DataFrame and outputs a DataFrame with a populated *bar_chart_tooltip_value* column.
+
+The function determines which value to display in the tooltip using the following rules:
+| Value Type / Status                     | Conversion Method                                |
+|----------------------------------------|-------------------------------------------------|
+| Range, Estimate, Qualitative Range, Qualitative Estimate | Uses the raw speaker number (`speaker_number_raw`) |
+| Exact                                  | Uses the numeric speaker count (`speaker_number_numeric`) |
+| Extinct, Dormant                        | Uses the vitality status (`vitality_status`)    |
+
+### Calculating Source Confidence
+The factors that
 
 
 
 
-1. Creating plotting data and tooltip value column (talk about raw data being more readable when its in range or approximate format)
-2. midpoint coordinates for map start
+
+
+
+
+
+
+
 3. calculating source confidence
 4. Calculate min and max for the non ranges using source confidence- for filtering function
 5. Determining whether a point lay in the polygon or not
@@ -164,3 +194,5 @@ Bring attention to lesser spoken languages by colouring them in red.
 You should show how you constructed the dashboard, demonstrating both the visual and code design. A dashboard implies either interactivity or up-to-date data; ideally, you should include both. This means your dashboard should be interactive and responsive, accommodating different types of users. It should also be updatable, should new data be available. Version control should be used to track the development of new features against documented requirements. You should show knowledge of the classes and methods of libraries used, extending functionality where appropriate. 
 ## Recommendation, Reflection and Conclusions (10%) 
 While this part alone is worth the least number of marks, this is critical for showing the learning that occurred during your work on the assignment, and effective completion of this section will allow you to get more marks in earlier sections. You should link your work to relevant knowledge, skills and behaviour from the apprenticeship, and ensure the marker has everything they need to use and evaluate your code.
+
+For bar chart could have had a max speaker and min speaker bar for ranges.
