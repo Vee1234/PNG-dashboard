@@ -99,8 +99,10 @@ class Visualiser:
     def show_title(self, title: str):
         st.title(title)
 
-    def create_map(self, header, caption, location: tuple = (-5, 149), zoom_start: int = 6) -> folium.Map:
+    def create_map(self, header: str, caption: str, df: pd.DataFrame, zoom_start: int = 6) -> folium.Map:
         '''Creates a folium map object with specified header, caption, location, and zoom level.'''
+  
+        location = self.analyser.find_midpoint_coordinates(df)
         st.header(header)
         st.subheader(caption)
         map = folium.Map(location=location, zoom_start=zoom_start, scrollWheelZoom=False, tiles='OpenStreetMap')

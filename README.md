@@ -52,8 +52,8 @@ I renamed these columns to improve readability and simplify referencing.  I did 
 Following that, I created a list of the relevant columns and created a new DataFrame with only these columns using the *create_new_dataframe_with_selected_columns* I built in *Processor*. 
 
 In preparation for data scraping, I tested a few of the links in  *language_location_data* to verify that they could  be accessed. When I navigated to any of the links to the Endangered Languages Project site, a 404 error occured. I discovered that URL schema changed from using the path /lang/<language-name> to /elp-language/<language-name>, replacing the original endpoint structure while retaining the language identifier as the terminal path segment. I wrote the *replace_url_in_values_in_column* method to rectify this.
- "the replace_url_in_values_in_column method loops through each link in each row of 'links' columns, replacing an expression with another. The replacement expression defaults to '', in which case the expression will simply be removed." )
-![alt text](<assets/Screenshot 2026-01-12 at 19.47.03.png>)
+ 
+![alt text](<assets/Screenshot 2026-01-12 at 19.47.03.png>"the replace_url_in_values_in_column method loops through each link in each row of 'links' columns, replacing an expression with another. The replacement expression defaults to '', in which case the expression will simply be removed." )
 ![alt text](<assets/Screenshot 2026-01-12 at 20.09.34.png>)
 
 
@@ -115,7 +115,7 @@ The following cases are then handled:
 8. Fallback numeric extraction: For any remaining formats, the function attempts to extract the first numeric value as speaker_number_numeric and identifies additional numbers as potential years.
 9. Error handling: Any unexpected formats trigger a safety net, assigning None to numeric fields to prevent crashing or misinterpretation.
 
-This function returns a DataFrame with populated fields containing cleaned values, ready for data analysis.
+This function returns a DataFrame with populated fields containing cleaned values, ready for data analysis. I wrote the cleaned DataFrame to *language_speaker_data_clean.csv*.
 
 #### Key modules and techniques used:
 The function uses pandas (pd.isna) for handling missing values, and regular expressions (re) for flexible pattern matching. These patterns, including numbers, ranges, years, approximate symbols, multipliers, and qualitative descriptors, are stored as class constants; as the pattern is only compiled once, the code is more efficient. 
@@ -128,7 +128,30 @@ The function emphasises capturing uncertainty. Following the methodological guid
 ## Methodology and Data Analysis (30%) 
 You should talk about and demonstrate your analysis methods and approaches to visualisation here. While the quality of data available will depend on your project, you should be able to demonstrate statistics at the level of collections and subcollections. You should consider what types of visualisations will best convey your insights, and how these will be accessible to your audience. You should also ensure your work is reproducible and that algorithms or formulas used for calculations are documented. 
 
-### V
+### Exploratory Visualisation
+
+I created exploratory visualisations to guide analysis decisions, prioritising user experience and accurate representation of data and uncertainties.
+
+I used the Folium library to create maps. In *Visualiser*, I built the *create_map* method which returns a Folium.Map object with an associated header and description. I extracted language_speaker_data from *language_speaker_data_clean.csv* and looped through the coordinates, adding each language as a point to the map. To display maps, Folium map HTML must be saved to a file and then read. To avoid repetitive code, I wrote the *display_map* method which accomplishes this.
+
+I used Streamlit to build and display my web app. As I navigated this elementary visualisation, I considered a few ideas that would improve the value and credibility of the dashboard:
+1. Adjusting the initial map coordinates to centre on Papua New Guinea
+2. Adding a tooltip to improve interactivity and readibility
+3. Calculation of source confidence and application to filtration functions to reflect uncertainty in values
+
+This exploration helped me decided which geographic and numerical visualisations I wished to display. Below is a list that I believe would bring value to my dashboard.
+1. A map displaying each language as a point equipped with a tooltip feature, filtration and search capabilities. This would allow the user to explore the individual languages speaker numbers and locations and identify language hotspots.
+2. A choropleth map displaying languages per administrative region. This would enable users to explore how the historically borderless linguistic landscape of Papua New Guinea is constrained by contemporary political boundaries.
+3. A bar chart displaying the number of speakers per language. This allows the user to directly compare the speaker numbers of all languages, at a macro level.
+
+### Analysis
+### Map Adjustment
+I used the midpoint
+This function calculates the geographic centre of the dataset by taking the midpoint between the minimum and maximum latitude and longitude values. This ensures that the map is centred on the full spatial extent of the languages rather than their average location. Because a large proportion of languages are concentrated in the north-west of Papua New Guinea, the mean coordinates were spatially skewed and unsuitable for map centring. Using the midpoints of the extrema provides a more balanced and representative map centre.
+### Deriving the Plotting Data and Tooltip Value columns
+
+
+
 
 1. Creating plotting data and tooltip value column (talk about raw data being more readable when its in range or approximate format)
 2. midpoint coordinates for map start

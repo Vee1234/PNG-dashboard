@@ -8,7 +8,7 @@ class Analyser:
                                       'speaker_number_type': {'exact': 1, 'estimate': 0.75, 'range': 0.5, 'qualitative estimate': 0.25, 'qualitative range': 0.25},
                                       'access_route': {'direct': 1, 'indirect': 0.5} }
         
-    def midpoint_coordinates(self, df: pd.DataFrame) -> tuple:
+    def find_midpoint_coordinates(self, df: pd.DataFrame) -> tuple:
         '''This function calculates the midpoint of the latitude and longitude from the dataframe.'''
         mid_latitude = ((df['latitude'].max() + df['latitude'].min())) / 2
         mid_longitude = ((df['longitude']).max() + df['longitude'].min()) / 2
