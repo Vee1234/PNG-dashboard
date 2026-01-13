@@ -315,8 +315,13 @@ There are a number of ways I have demonstrated exemplary OOP in this project:
    Passing an `Analyser` to `Visualiser` instead of internal creation reduces coupling, increases testability, and allows flexible swapping of analysis logic.
 
 ### Updating Ease
+The `add_new_row_to_csv` function allows new language entries to be added directly to the CSV file without manually editing it.
+The LanguageEntry dataclass acts as a template for a row in `language_speaker_data_clean`. By converting a LanguageEntry dataclass to a dictionary and appending it, the function ensures consistent formatting, preserves existing data, and makes updates reproducible and error-free. The scraping and cleaning functions can then be performed on this dataset.
 
 ### Version Control
+I have demonstrated exemplary version control in this assignment by making regular and meaningful commits, which can be seen from my commit history, located on this repo's page on github.com. Each commit documents a clear change: e.g. Corrected ordering of default and non-default fields, Inverted the colour scheme outlined in the html.
+
+However, my use of version control could be improved by only committing a single change at a time, to trace bugs more easily in the future.
 
 
 
