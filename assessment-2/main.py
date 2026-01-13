@@ -75,11 +75,11 @@ def main():
 
     visualiser.show_title("Language Speaker Data Visualisation for Papua New Guinea")
     boundaries_data = data_loader.load_data_from_json('assessment-2/data/geoBoundaries-PNG-ADM1.geojson')
-    filter_map = visualiser.create_map("Geographical Speaker Distribution", "Hover over each point to learn more about the language.", location= (-5, 149), zoom_start=4)
+    filter_map = visualiser.create_map("Geographical Speaker Distribution", "Hover over each point to learn more about the language.", location= (-5, 149))
     visualiser.display_filtered_map(language_speaker_data, filter_map)
     visualiser.search_for_language(language_speaker_data, filter_map)
     filtered_df = visualiser.display_map(filter_map, 'filtered_language_map.html')
-    choropleth_map = visualiser.create_map("Number of Languages Spoken by Province", "Hover over each province to see how many languages are spoken there.", location= (-5, 149), zoom_start=6)
+    choropleth_map = visualiser.create_map("Number of Languages Spoken by Province", "Hover over each province to see how many languages are spoken there.", location= (-5, 149))
     df = analyser.build_province_language_mapping(boundaries_data, language_speaker_data)
     visualiser.create_choropleth(boundaries_data, df, choropleth_map)
     visualiser.display_map(choropleth_map,'choropleth_map.html')
