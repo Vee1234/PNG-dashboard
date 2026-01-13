@@ -13,9 +13,8 @@ Students should use version control for this assignment, both to demonstrate goo
 *Please replace this readme file with project documentation.*
 
 ## Introduction, Scope and Context (30%) 
-You should set the scope of the dashboard, discussing any datasets or databases you will be using (provenance - where they came from, how they came to be collected) and any work needed to get the data in a usable format (cleaning) or to store it before analysis (use of databases, application programming interfaces or data stored in various file formats). You may use any responsibly-sourced data for this project; it is also possible to use synthetic (i.e. fake) data if appropriate, though this may affect the following section. It is worth looking for similar projects in your area, both to provide context and to give you ideas for the analysis and implementation. You should discuss and justify your choice of libraries and tools.
 ### Introduction
-With over 800 languages spoken by a population of just over 10 million people, Papua New Guinea is the most linguistically rich country in the world. I built a Streamlit-powered data dashboard to enable interactive exploration of language distribution and speaker populations across Papua New Guinea through three complementary visualisations. First, a geographic map displays the epicentres of individual languages, colour-coded by number of speakers. Interactive tooltips provide language-specific metadata, and users can filter by speaker population or search for individual languages. Second, a choropleth map shows the number of distinct languages spoken within each administrative province, with hover-based interaction revealing provincial counts. Third, a logarithmically scaled bar chart presents speaker populations for all languages, with extinct languages visually distinguished. The underlying dataset was built on an established data set, wth significant supplementation from data scraping and derived data. Single-responsibility classes encapsulate methods, with some classes having their own class variables.
+With over 800 languages spoken by a population of just over 10 million people, Papua New Guinea is the most linguistically rich country in the world. I built a Streamlit-powered data dashboard to enable interactive exploration of language distribution and speaker populations across Papua New Guinea through three complementary visualisations. First, a geographic map displays the epicentres of individual languages, colour-coded by number of speakers. Interactive tooltips provide language-specific metadata, and users can filter by speaker population or search for individual languages. Second, a choropleth map shows the number of distinct languages spoken within each administrative province, with hover-based interaction revealing provincial counts. Third, a logarithmically scaled bar chart presents speaker populations for all languages, with extinct languages visually distinguished. The underlying dataset was built on an established data set, wth significant supplementation from data scraping and derived data. The final dataset is stored in *language_speaker_number_clean.csv*. Single-responsibility classes encapsulate methods, with some classes having their own class variables.
 
 ### Gap Analysis
 The problem addressed by this dashboard was defined through a review of existing linguistic visualisation tools and databases, focusing on their analytical scope, the combinations of data presented and the way that the data is presented. This analysis revealed a consistent emphasis on descriptive representation, with gaps in predictive insights, speaker number- geographical visualisations and national-regional language statistics offerings. The table below outlines a few of the different categories I analysed for gaps: 
@@ -64,7 +63,66 @@ Following that, I created a list of the relevant columns and created a new DataF
 In preparation for data scraping, I tested a few of the links in  *language_location_data* to verify that they could  be accessed. When I navigated to any of the links to the Endangered Languages Project site, a 404 error occured. I discovered that URL schema changed from using the path /lang/<language-name> to /elp-language/<language-name>, replacing the original endpoint structure while retaining the language identifier as the terminal path segment. I wrote the *replace_url_in_values_in_column* method to rectify this.
  "the replace_url_in_values_in_column method loops through each link in each row of 'links' columns, replacing an expression with another. The replacement expression defaults to '', in which case the expression will simply be removed." )
 ![alt text](<images/Screenshot 2026-01-12 at 19.47.03.png>)
+![alt text](<images/Screenshot 2026-01-12 at 20.09.34.png>)
+
+
  ## Data Scraping
+ In the *language_location_df* a list of links is listed for each language. As shown above, the three websites which consistently displayed speaker numbers were EndangeredLanguages.com, wikipedia.com and apics-online.info. To maximise data coverage, I could consider scraping data from all of these sources. I reviewed the Terms of Use and the robots.txt for each website to determine whether scraping was allowed and if so, under what conditions.
+
+ With a strong focus on preserving and protecting indigenous cultures, EndangeredLanguages.com required its users to 'respect Indigenous Speakers' rights and decisions about their languages, cultures and knowledge' and 'approach all languages and materials with respect, responsibility, and care'. Furthermore, scraping for the purpose of training or fine tuning AI models is explicitly proibited. Wikipedia.com welcome friendly, low-speed bots welcome to view article pages, but not dynamically generated pages. I could not find any scraping guidance for apics-online.info, therefore I tried to keep my scraping algorithm as polite as possible. I cached each website I accessed (each website's cache can be find the cache folder) to minimise request rate and set retries to occur every 2 seconds, putting the request rate at 0.5 seconds, well below Wikipedia's limit. Finally, I created a User Agent header to reveal my scraping bot as a custom, academic one and to prevent retrieval failures or being blocked by the website. 
+
+ (self.HEADERS insert here)
+ 
+I designed an algorithm to ethically and efficiently extract data from a specified website domain for each language. I chose to use Beautiful Soup to extract data from the websites’ HTML because the three sources had markedly different HTML structures. The relevant information was embedded in different tags and at varying depths of nesting across the sites, so a flexible parsing tool was required. Beautiful Soup allows HTML to be navigated in multiple ways—by tag, attributes, hierarchy, and relationships between elements—making it well suited to handling this structural variability.
+
+This algorithm powers the code in the master function, *orchestrate_data_scraping_per_domain_name*, in *DataLoader*. 
+
+
+(orchestrate_data_scraping_...)
+
+The master function calls other methods with specific roles in the data scraping process. The *get_page* method hadnles retrieval and caching of website html, *scrape_data_in_class_field_from_website* retrieves the speaker number or vitality status from this html. Overall, *orchestrate_data_scraping* handles the execution of the algorithm, as well as populating rows in the dataframe with the correct values. 
+
+The algorithm is extremely flexible; it successfully retrieves data from websites with a wide variety of html structures. The *speaker_number_html_field*, *attribute1*, *attribute2*, *string_expression* and *method_called_after_label_identified* arguments allow the user to describe the unique html structure of the desired website, which meant this algorithm was compatible with all three websites to be scraped. However, one downside of this algorithm is that it requires siginificant user knowledge of the underlying html structure. 
+
+I created a dataclass called *Result* to provide a structure for what information needed to be stored in the final DatFrame and facilitate the storage of the scraping results. A new instance of the Result dataclass was created for each language and appended to a list of results.
+
+The first column that is populated by the algorithm is 'speaker_number_raw'. This is an unclean, textual representation of the number of speakers. Where no speaker number was found, the value was set to None. The 'speaker_number_raw' field of a language which has been identified as extinct or dormant is temporarily set to this vitality status, before 'vitality_status' is filled by the *fill_columns_based_on_language_vitality* method.
+
+'Extinct' and 'Dormant' are qualitative linguistic definitions that don't simply mean 'number of speakers = 0'. The Unesco Ad Hoc Group on Endangered Languages defines 'Extinct' as 'There is no one who can speak or remember the language.' whereas Endangered Languages defines a dormant language as one that 'does not have any living fluent speakers/signers'. Whilst sometimes these terms are equated to a zero speaker value in academia, there have been cases where a small, previously unknown, community of speakers has emerged. To show respect for the indigenous cultures and Endangered Language's Terms of Use, I set 'speaker_value_raw' to None for langauges reported as extinct or dormant. 
+
+To keep a record of credibility and allow for quantification of confidence (which will be performed after the data is cleaned), the url which was accessed, the source category (primary, secondary or tertiary), the source type (expert-curated or community-curated) and access route (direct or indirect) for each source domain are collected and stored in individual columns in the DataFrame. 
+
+The final step of the scraping algorithm was to combine geographical, speaker number, vitality status and source data into a single DataFrame. I converted the list of scraping results into a DataFrame and performed a left join with the language_location_data DataFrame, using 'language' as the primary key. The resulting dataFrame, called final_df in *orchestrate_data_scraping_per_domain_name* was written to *language_speaker_data.csv*
+
+## Data Cleaning
+The speaker_value_raw column contained a wide variety of formats and structures, including ranges (e.g., “3–5 million”), approximate values (e.g., “~200”), historical references (e.g., “2000 cited 1990”), and qualitative descriptions (e.g., “a few dozen speakers or less”). These inconsistencies required careful cleaning and standardisation in order to convert the raw entries into consistent numeric values suitable for analysis.
+
+
+### Speaker Number Cleaning Function
+The *clean_speaker_number* function is designed to standardise and convert raw speaker number data from heterogeneous formats into a numeric format suitable for analysis. It handles missing, approximate, range-based, qualitative, and cited speaker counts. The function populates several fields in the dataset, including speaker_number_numeric, speaker_number_min, speaker_number_max, speaker_number_type, and speaker_number_year, to capture the variety and uncertainty in the original data.
+Key cases handled:
+1. Missing data: If the speaker_number_raw value is missing (NaN), the function assigns None to indicate an absent or unknown speaker count.
+2. Exact numeric values: Values containing only a single number are parsed as integers and marked as exact. Both the minimum and maximum speaker counts are set to this value.
+3. Cited data: Entries that include the word "cited" are interpreted as historical references. The function extracts the numeric value before the citation and, if present, records the cited year separately.
+4. Approximate numbers: Values indicated with symbols such as ~ are treated as estimates. The numeric component is extracted, and the type is marked as "estimate".
+5. Upper-bound indicators: Phrases such as "less than X" or "fewer than X" are interpreted as ranges from 0 to the specified number, with the type "range" or "qualitative range" to reflect uncertainty.
+6. Explicit ranges: Values formatted as "min–max" are parsed into speaker_number_min and speaker_number_max fields, with type "range".
+7. Multipliers and quantifiers: Words like "thousand", "million", or qualitative quantifiers such as "dozen" are converted into numeric equivalents using predefined dictionaries, which are stored as class variables in the *Processor* class. This allows entries like "a few dozen" or "2–3 million" to be standardized.
+8. Fallback numeric extraction: For any remaining formats, the function attempts to extract the first numeric value as speaker_number_numeric and identifies additional numbers as potential years.
+9. Error handling: Any unexpected formats trigger a safety net, assigning None to numeric fields to prevent crashing or misinterpretation.
+
+Key modules and techniques used:
+The function uses pandas (pd.isna) for handling missing values, and regular expressions (re) for flexible pattern matching. These patterns, including numbers, ranges, years, approximate symbols, multipliers, and qualitative descriptors, are stored as class constants; as the pattern is only compiled once, the code is more efficient. 
+Multipliers
+Dictionaries for multipliers and quantifiers are used to convert human-readable estimates into numeric values, while string preprocessing (lowercasing, stripping, removing commas) standardizes the input before parsing.
+
+Statistical considerations
+The function emphasizes capturing uncertainty. Following the methodological guidance for self-selected interval data (Angelov et al., 2024), ranges were treated as interval-censored rather than collapsed into exact values. The function preserves ranges (min/max) and explicitly marks estimates or qualitative values. It also avoids misleading precision by not rounding or approximating values unnecessarily; if the raw data is approximate, the output retains that uncertainty in the type and min/max fields. Finally, the function ensures ethical representation of data: by distinguishing between exact counts, estimates, and ranges, it prevents misrepresentation of language vitality or speaker populations, which is particularly important for endangered or poorly documented languages.  This aligns with best practices in linguistics and demographic analysis, where speaker counts may be uncertain, approximate, or based on historical sources. 
+
+
+
+
+ 
 
 
 

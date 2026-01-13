@@ -77,7 +77,7 @@ class DataLoader:
         print(f"Failed to retrieve {url} after {retries} attempts.")
         return None
           
-    def orchestrate_data_scraping_per_domain_name(self, df: pd.DataFrame, domain_name: str, speaker_number_html_field: str, source_category: str, source_type: str, access_route: str, attribute1: str = None, attribute2: str = None, string_expression: str = None, method_called_after_label_identified: str= None, preference_list: list = ['endangeredlanguages.com', 'apics-online.info', 'wikipedia.org'], vitality_status_html_field: str= None, vitality_certainty_html_field: str= None) -> pd.DataFrame:
+    def orchestrate_data_scraping_per_domain_name(self, df: pd.DataFrame, domain_name: str, speaker_number_html_field: str, source_category: str, source_type: str, access_route: str, attribute1: str = None, attribute2: str = None, string_expression: str = None, method_called_after_label_identified: str= None, preference_list: list = ['endangeredlanguages.com', 'apics-online.info', 'wikipedia.org']) -> pd.DataFrame:
         """
         Orchestrates the scraping of speaker number data for a specific domain name from a DataFrame of languages.
 
@@ -93,8 +93,6 @@ class DataLoader:
             string_expression (str, optional): String expression to refine the search. Defaults to None.
             method_called_after_label_identified (str, optional): Method to call on the identified label. Defaults to None.
             preference_list (list, optional): Ordered list of preferred domains for scraping. Defaults to ['endangeredlanguages.com', 'apics-online.info', 'wikipedia.org'].
-            vitality_status_html_field (str, optional): HTML class field for vitality status. Defaults to None.
-            vitality_certainty_html_field (str, optional): HTML class field for vitality certainty. Defaults to None.
 
         Processes:
             - Iterates through each row in the DataFrame.

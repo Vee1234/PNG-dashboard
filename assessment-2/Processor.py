@@ -41,13 +41,10 @@ class Processor:
             print(f"Column '{column_name}' does not exist in the DataFrame.")
             return df
         
-    def replace_regex_character(self, df: pd.DataFrame, original_regex: str, replacement_character: str) -> pd.DataFrame:
+    def replace_character(self, string, original_character: str, replacement_character: str) -> pd.DataFrame:
         '''Replaces characters in the dataframe based on a regex pattern.'''
-        df = df.replace(
-        {rf'{original_regex}': replacement_character},
-        regex=True
-        )
-        return df
+        text_clean = re.sub(original_character, replacement_character, string)
+        return text_clean
     
     def replace_url_in_values_in_column(self, df: pd.DataFrame, expression: str, replacement: str = '') -> pd.DataFrame:
         for link_list in df['links']:
@@ -72,8 +69,9 @@ class Processor:
             if pd.isna(raw):
                 row["speaker_number_numeric"] = None
                 return row
-
-            raw = str(raw).lower().replace(",", "").strip() #1000 cited 2000-2003
+            raw = str(raw).lower()
+            raw = self.replace_character('[\u2012\u2013\u2014]', '-', raw)
+            raw = self.replace_character('[\u00A0\u202F\u2007]', ' ', raw)
 
             # ---------- Possibility 2: Speaker number raw contains only 1 number ----------
             if raw.isdigit():
@@ -187,7 +185,7 @@ class Processor:
             row["speaker_number_numeric"] = None
             return row
         
-    def build_province_language_mapping(self, boundaries_data, language_df):
+    def build_province_language_mapping(self, boundaries_data: dict, language_df: pd.DataFrame) -> pd.DataFrame:
         '''This function builds a mapping of provinces to the number of languages spoken in each province.
         -OUTPUT: DataFrame with columns 'Province', 'Number of Languages', 'Languages List'''
 
