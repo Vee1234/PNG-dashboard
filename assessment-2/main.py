@@ -5,10 +5,10 @@ from Processor import Processor
 import altair as alt
 
 def main():
-    visualiser = Visualiser()
     data_loader = DataLoader()
     analyser = Analyser()
     processor = Processor()
+    visualiser = Visualiser(analyser)
     # """ 
     # language_location_data = data_loader.load_data_from_json("data/PNG_all_languages_coordinate_data.geojson")
     # df = processor.convert_json_to_df(language_location_data, 'features')
@@ -74,7 +74,7 @@ def main():
     language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data_clean.csv') 
     boundaries_data = data_loader.load_data_from_json('assessment-2/data/geoBoundaries-PNG-ADM1.geojson')
     language_mapping = data_loader.load_data_from_csv('assessment-2/data/province_language_mapping.csv')
-    
+     #VISUALISATIONS
     visualiser.show_title("Language Speaker Data Visualisation for Papua New Guinea")
     filter_map = visualiser.create_map("Geographical Speaker Distribution", "Hover over each point to learn more about the language.", language_speaker_data)
     visualiser.display_filtered_map(language_speaker_data, filter_map)

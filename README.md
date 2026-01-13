@@ -252,25 +252,76 @@ I displayed my visualisations using the Streamlit framework.
 ### Interactivity
 I have implemented interactivity into this dashboard in four ways.
 #### 1. Tooltips
-Each of the visualisations on the dashboard is equipped with a tooltip.
-In the Languages Map, when the user hovers over a Circle marking a language, a small window appears with information about the language name, speaker number, speaker number type (eg. exact, range, estimate), source
-#### 2. Popups
-#### 3. Search Languages
-#### 4. Filtration
-### UX Considerations
-#### 1. Help
-#### 2. Filtration Logarithmic Scale
-### Structure
+Each of the visualisations on the dashboard is equipped with a tooltip. The tooltips provide immediate, on-demand information without cluttering the map, allowing users to explore data dynamically. One limitation for tooltips is that are not as effective on touch-screen devices.
+
+In the Languages Map, when the user hovers over a Circle marking a language, a small window appears with language name and any other metadata that would useful for a user, such as speaker number, speaker number type (eg. estimate, range, exact), source, year cited and confidence score. This approach enhances interactivity, accessibility, and transparency while allowing the dashboard to update dynamically as new data is added. To identify which of these fields are present for each language entry, I created the *structure_tooltip* function which is outlined below:
+
+1. Initialise an empty list to store HTML lines.
+2. Add the language name if available.
+3. Add exact speaker numbers for entries marked as "exact".
+4. Add raw speaker numbers for ranges, estimates, or qualitative types.
+5. Add the year the speaker number was cited, if available.
+6. Add the vitality status of the language.
+7. Add the source confidence score.
+8. Add the speaker number type.
+9. Add the source of the data.
+10. Join all lines with HTML <br> tags to produce a single tooltip string.
+
+The tooltip string returned from this function is parsed as a parameter where the point for that language is created.
+This function is reusable and reproducible.
+
+For the choropleth map, the tooltip is combined with the highlight capability of Folium.choropleth. 
+The tooltip enriches the map by adding the number of languages spoken per province as a property and visualises the provinces with borders and interactive tooltips using Folium. It enables users to see both the province name and the number of languages directly by hovering over each region. The highlighting on hover draws attention to the selected province, improving usability and helping users focus on areas of interest. Users can interactively compare provinces in a single visualisation, making spatial patterns in language distribution more understandable.
+
+Finally, when the user hovers over each of the bars in the bar graph, the name of the language and *bar_chart_tooltip_value* appear. This provides the user with a more precise understanding of speaker population sizes, complementing the relative comparisons indicated by bar lengths. As no conditional logic was needed to assemble the contents of this tooltip, it could simply be written in the bar chart's 'Tooltip' field.
+
+#### 2. Search Languages
+The search functionality, in the *search_for_language* method, enables users to search for a specific language from the dataset using a dropdown menu in the Streamlit sidebar. Selected languages are highlighted on the Folium map with larger, red circle markers, while other languages remain smaller and white. The map automatically centres on the selected language, providing immediate spatial context.
+This contributes to an interactive and responsive experience for the user in the following ways:
+1. Users can focus on any language of interest, making the dashboard responsive to individual queries.
+2. Highlighting selected languages with colour and size enhances clarity and reduces cognitive load.
+3. Automatic recentering ensures the highlighted language is immediately visible, improving usability.
+4. Marker clustering maintains readability in regions with dense language points, supporting exploration of large datasets. The user can click on these clusters to navigate to languages, allowing users to have more control over their experience.
+5. The dropdown menu offers an interactive interface, dynamically filtering options as the user types to enable responsive language selection.
+
+Currently, the circle representing the selected language is added to a cluster before being added to a map. This functionality could bring even more value if multiple languages could be selected at a time and added to a cluster, enabling comparative exploration across multiple languages simultaneously.
+
+#### 3. Filtration
+
+The filtration functionality in *display_filtered_map* enables interactive filtering of languages by speaker population using a logarithmic slider. I chose to use a logarithmic slider to accommodate the wide range of speaker counts and enable finer, more interactive control in the lower range, where the majority of languages are concentrated . The selected slider values are converted into absolute speaker thresholds by exponentiation, producing lower and upper bounds (user_min, user_max). Languages are retained if their estimated speaker range (bounded by speaker_value_min and speaker_value_max calculated in analysis) overlaps with the selected bounds, ensuring uncertainty-aware filtering. The filtered results are then displayed on the map using clustered markers.
+
+This function demonstrates exemplary interactivity in the following ways:
+1. The slider allows intuitive exploration across several orders of magnitude without overwhelming the user.
+2. Slider inputs are transparently mapped to meaningful numeric bounds in real time.
+3. The selected range displayed below the slider updates instantly as the slider moves, providing clear, real-time feedback that directly links user input to the data displayed.
+4. The map updates instantly as filters change, reinforcing exploratory analysis.
+5. Marker clustering preserves readability as the number of displayed languages changes.
+
+### OOP Structure
+There are a number of ways I have demonstrated exemplary OOP in this project:
+1. **Separation of concerns**  
+   `DataLoader`, `Processor`, `Analyser`, `Visualiser`, and `Result` each handle a single workflow stage, improving readability, testability, and maintainability.
+
+2. **Low coupling**  
+   Restricting instantiation (only `Visualiser` creates `Analyser`) limits dependencies, making components easier to replace, extend, or test independently. 
+
+3. **Structured outputs via dataclass**  
+   `Result` enforces explicit, typed data objects, avoiding shared mutable state and aligning with functional principles.
+
+4. **Controlled execution**  
+   `if __name__ == "__main__": main()` separates workflow control from class logic, supporting reuse, testing, and reproducible pipelines.
+
+5. **Dependency injection**  
+   Passing an `Analyser` to `Visualiser` instead of internal creation reduces coupling, increases testability, and allows flexible swapping of analysis logic.
+
 ### Updating Ease
+
 ### Version Control
 
 
 
-Interactivity: tooltips, search function, filtering function, clickable clusters
-Structure: OOP
-How easy is it to update
-Improved user experience: logarithmic filtering scale
-Regular commits, descriptive commit messages, commit after each method
+
+
 
 ## Recommendation, Reflection and Conclusions (10%) 
 While this part alone is worth the least number of marks, this is critical for showing the learning that occurred during your work on the assignment, and effective completion of this section will allow you to get more marks in earlier sections. You should link your work to relevant knowledge, skills and behaviour from the apprenticeship, and ensure the marker has everything they need to use and evaluate your code.

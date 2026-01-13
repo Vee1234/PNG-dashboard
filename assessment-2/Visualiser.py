@@ -8,8 +8,8 @@ from folium.plugins import MarkerCluster
 import math
 from Analyser import Analyser
 class Visualiser:
-    def __init__(self):
-        self.analyser = Analyser()
+    def __init__(self, analyser : Analyser):
+        self.analyser = analyser
         self.MIN_POWER_OF_TEN = -1.0
         self.ICON_CREATE_FUNCTION =  """
         function(cluster) {
@@ -108,7 +108,7 @@ class Visualiser:
         map = folium.Map(location=location, zoom_start=zoom_start, scrollWheelZoom=False, tiles='OpenStreetMap')
         return map
     
-    def structure_popup(self, row) -> str:
+    def structure_tooltip(self, row) -> str:
         """
         Generates an HTML string for a popup tooltip based on the data in a given row.
 
@@ -256,7 +256,7 @@ class Visualiser:
             folium.Circle(
                 location=[row['latitude'], row['longitude']],
                 color=self.assign_colour_based_on_speaker_number(df, idx),
-                tooltip= folium.Tooltip(self.structure_popup(row), max_width=800),
+                tooltip= folium.Tooltip(self.structure_tooltip(row), max_width=800),
                 radius=15000,
                 stroke = True,
                 fill = True,
