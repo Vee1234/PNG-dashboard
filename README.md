@@ -1,20 +1,11 @@
-## Island Dashboard 
-The goal of this assignment is to scope, design, implement and document a data dashboard for an island that addresses the key challenges of said island. The design of the dashboard and its functionality should come from the student; however, you will be introduced to the following tools throughout the course and it is suggested you use one of these: 
-- *Gradio*
-- *Streamlit*
-- *Panel*
-- *iPyWidget*
-- *Dash* 
-
-Other libraries may be used with instructor permission.
-
-Students should use version control for this assignment, both to demonstrate good practice, to demonstrate authorship and to prevent any loss of code or work. You will be provided a repository for your final project on the Queen Mary Enterprise GitHub server. Commit regularly – a branch will be duplicated from the main branch at the deadline above. If you are unable to submit via GitHub, there will be a backup submission point on QM Plus. If you submit this way, please zip your folder and submit. Ensure you include the .git subfolder - just downloading from the GitHub page will not have this by default. Your application must include the code to make the notebook work in either .py  or .ipynb and all requirements, either in a *requirements.txt* file or *pyproject.toml* file. Assets can be included in the ZIP file – it is also possible to use a bash script command to retrieve these.  
-
-*Please replace this readme file with project documentation.*
-
+## Island Dashboard
 ## Introduction, Scope and Context
 ### Introduction
-With over 800 languages spoken by a population of just over 10 million people, Papua New Guinea is the most linguistically rich country in the world. I built a Streamlit-powered data dashboard to enable interactive exploration of language distribution and speaker populations across Papua New Guinea through three complementary visualisations. First, a geographic map displays the epicentres of individual languages, colour-coded by number of speakers. Interactive tooltips provide language-specific metadata, and users can filter by speaker population or search for individual languages. Second, a choropleth map shows the number of distinct languages spoken within each administrative province, with hover-based interaction revealing provincial counts. Third, a logarithmically scaled bar chart presents speaker populations for all languages, with extinct languages visually distinguished. The underlying dataset was built on an established data set, wth significant supplementation from data scraping and derived data. The final dataset is stored in *language_speaker_number_clean.csv*. Single-responsibility classes encapsulate methods, with some classes having their own class variables.
+With over 800 languages spoken by a population of just over 10 million people, Papua New Guinea is the most linguistically rich country in the world. I built a Streamlit-powered data dashboard to enable interactive exploration of language distribution and speaker populations across Papua New Guinea through three complementary visualisations. First, a geographic map displays the epicentres of individual languages, colour-coded by number of speakers. Interactive tooltips provide language-specific metadata, and users can filter by speaker population or search for individual languages. Second, a choropleth map shows the number of distinct languages spoken within each administrative province, with hover-based interaction revealing provincial counts. Third, a logarithmically scaled bar chart presents speaker populations for all languages, with extinct languages visually distinguished.
+
+**The dashboard is deployed on StreamLit and can be accessed at this URL: https://vee1234-png-dashboard-assessment-2main-szkkgy.streamlit.app/**
+ The underlying dataset was built on an established data set, wth significant supplementation from data scraping and derived data. The final dataset is stored in *language_speaker_number_clean.csv*. Single-responsibility classes encapsulate methods, with some classes having their own class variables.
+
 
 ### Gap Analysis
 The problem addressed by this dashboard was defined through a review of existing linguistic visualisation tools and databases, focusing on their analytical scope, the combinations of data presented and the way that the data is presented. This analysis revealed a consistent emphasis on descriptive representation, with gaps in predictive insights, speaker number- geographical visualisations and national-regional language statistics offerings. The table below outlines a few of the different categories I analysed for gaps: 
@@ -90,7 +81,7 @@ I created a dataclass called *Result* to provide a structure for what informatio
 Users may provide a preference list (to the *preference_list* argument) to indicate the order in which websites should be scraped, with the default configuration placing wikipedia.org last. 
 
 An essential part of the algorithm is defining when the scraping process is complete. To preserve the order of the preference list, the scraping process is coomplete when the contents of result fail to meet this condition, which is seen in *orchestrate_data_scraping_per_domain_name*:
-```if domain_name in url and (preference_list.index(result["speaker_source"])>preference_list.index(domain_name) or result["speaker_source"] == None)'''
+```if domain_name in url and (preference_list.index(result["speaker_source"])>preference_list.index(domain_name) or result["speaker_source"] == None)```
 This logic ensures that a website is only scraped if it appears in the user-defined preference list and has higher priority than any previously recorded source, or if no source has yet been recorded. It prioritizes more reliable sources and reduces redundant scraping.
 
 The first column that is populated by the algorithm is 'speaker_number_raw'. This is an unclean, textual representation of the number of speakers. Where no speaker number was found, the value was set to None. The 'speaker_number_raw' field of a language which has been identified as extinct or dormant is temporarily set to this vitality status, before 'vitality_status' is filled by the *fill_columns_based_on_language_vitality* method.
@@ -101,7 +92,7 @@ To keep a record of credibility and allow for quantification of confidence (whic
 
 The final step of the scraping algorithm was to combine geographical, speaker number, vitality status and source data into a single DataFrame. I converted the list of scraping results into a DataFrame and performed a left join with the language_location_data DataFrame, using 'language' as the primary key. The resulting dataFrame, called final_df in *orchestrate_data_scraping_per_domain_name* was written to *language_speaker_data.csv*
 
-### Key Modules and Techniques Used
+#### Key Modules and Techniques Used
 I chose to use Beautiful Soup to extract data from the websites’ HTML because the three sources had markedly different HTML structures. The relevant information was embedded in different tags and at varying depths of nesting across the sites, so a flexible parsing tool was required. Beautiful Soup allows HTML to be navigated in multiple ways—by tag, attributes, hierarchy, and relationships between elements—making it well suited to handling this structural variability.
 I used requests for its simple, robust interface, which streamlines HTTP requests, header handling, timeouts, and exceptions, making web scraping more reliable and concise than Python’s built-in urllib.
 
@@ -134,17 +125,18 @@ The function converts human-readable estimates into numeric values using diction
 The function emphasises capturing uncertainty. Following the methodological guidance for self-selected interval data (Angelov et al., 2024), ranges were treated as interval-censored rather than collapsed into exact values. The function preserves ranges (min/max) and explicitly marks estimates or qualitative values. It also avoids misleading precision by not rounding or approximating values unnecessarily; if the raw data is approximate, the output retains that uncertainty in the type and min/max fields. Finally, the function ensures ethical representation of data: by distinguishing between exact counts, estimates, and ranges, it prevents misrepresentation of language vitality or speaker populations, which is particularly important for endangered or poorly documented languages.  This aligns with best practices in linguistics and demographic analysis, where speaker counts may be uncertain, approximate, or based on historical sources. 
 
 
-
-
-
-
- 
-
-
-
-
 ## Methodology and Data Analysis (30%) 
 You should talk about and demonstrate your analysis methods and approaches to visualisation here. While the quality of data available will depend on your project, you should be able to demonstrate statistics at the level of collections and subcollections. You should consider what types of visualisations will best convey your insights, and how these will be accessible to your audience. You should also ensure your work is reproducible and that algorithms or formulas used for calculations are documented. 
+
+### V
+
+1. Creating plotting data and tooltip value column (talk about raw data being more readable when its in range or approximate format)
+2. midpoint coordinates for map start
+3. calculating source confidence
+4. Calculate min and max for the non ranges using source confidence- for filtering function
+5. Determining whether a point lay in the polygon or not
+Bring attention to lesser spoken languages by colouring them in red.
+
 ## Design and Implementation (30%) 
 You should show how you constructed the dashboard, demonstrating both the visual and code design. A dashboard implies either interactivity or up-to-date data; ideally, you should include both. This means your dashboard should be interactive and responsive, accommodating different types of users. It should also be updatable, should new data be available. Version control should be used to track the development of new features against documented requirements. You should show knowledge of the classes and methods of libraries used, extending functionality where appropriate. 
 ## Recommendation, Reflection and Conclusions (10%) 

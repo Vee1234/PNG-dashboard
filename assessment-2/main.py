@@ -66,19 +66,12 @@ def main():
     language_speaker_data = data_loader.load_data_from_csv('assessment-2/data/language_speaker_data_clean.csv')   
     #language_speaker_data = language_speaker_data.apply(processor.clean_speaker_number, axis=1)
     #language_speaker_data = language_speaker_data.apply(analyser.calculate_source_confidence, axis=1)
-    #language_speaker_data = language_speaker_data.apply(analyser.calculate_min_and_max_for_not_ranges, axis=1)
-    
-    
    
-    #language_speaker_data = processor.create_plotting_data_column(language_speaker_data)
+    #language_speaker_data = analyser.create_plotting_data_column(language_speaker_data)
 
-    #language_speaker_data = processor.create_tooltip_column_for_barchart(language_speaker_data)
+    #language_speaker_data = analyser.create_tooltip_column_for_barchart(language_speaker_data)
     #data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
     
-    
-    
-#in some cases, wiki data not loading
-#andai and meakambut do not have figures n the df even though there is a figure on the endangered languages website- why?
 
     visualiser.show_title("Language Speaker Data Visualisation for Papua New Guinea")
     boundaries_data = data_loader.load_data_from_json('assessment-2/data/geoBoundaries-PNG-ADM1.geojson')
@@ -87,7 +80,7 @@ def main():
     visualiser.search_for_language(language_speaker_data, filter_map)
     filtered_df = visualiser.display_map(filter_map, 'filtered_language_map.html')
     choropleth_map = visualiser.create_map("Number of Languages Spoken by Province", "Hover over each province to see how many languages are spoken there.", location= (-5, 149), zoom_start=6)
-    df = processor.build_province_language_mapping(boundaries_data, language_speaker_data)
+    df = analyser.build_province_language_mapping(boundaries_data, language_speaker_data)
     visualiser.create_choropleth(boundaries_data, df, choropleth_map)
     visualiser.display_map(choropleth_map,'choropleth_map.html')
     visualiser.show_logarithmic_bar_graph(language_speaker_data)
