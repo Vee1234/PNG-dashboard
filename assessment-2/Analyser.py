@@ -1,5 +1,5 @@
 import pandas as pd
-import shapel
+from shapely.geometry import Point, shape
 
 class Analyser:
     def __init__(self):
