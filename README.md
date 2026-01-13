@@ -34,8 +34,6 @@ Provenance analysis aided me to determine which resources were most suitable for
 | **Wikipedia**                            | Speaker numbers and vitality status (fallback cases)                               | Community-curated tertiary source with low academic credibility.                                                                                                    | Aggregates information from secondary sources, often Ethnologue, without guaranteed traceability.                                                             | Update frequency is inconsistent.                  | High uncertainty due to indirect sourcing and lack of verification; error may propagate from upstream sources, resulting in an incorrect speaker number value. | Used only when no other data were available, improving completeness at the cost of increased uncertainty.                                              | Freely accessible; ethical use requires explicit acknowledgment of limitations. |
 | **APiCS**                                | Speaker numbers for pidgin and creole languages                                    | Edited by academic linguists and supported by major research institutions.                                                                                          | Demographic and linguistic data compiled by domain experts; originally published as a peer-reviewed volume.                                                   | Continuously maintained.                           | Limited to pidgin and creole languages; not representative of all language types.                              | Provides reliable, expert-approved speaker estimates for a specific language class.                                                                    | Freely accessible and suitable for scholarly use.                               |
 
-## Code Structure
-In this project, I  decided to apply OOP principles and abstract methods into single-responsibility classes. 
 ## Initial Data Cleaning 
 The first resource I required was a comprehensive list of languages with their respective coordinates. I obtained this from GeoJSON which I copied from the Glottolog website. I retrieved the data using the *load_data_from_json* function in the *DataLoader* class shown below:
 ![alt text](<assets/Screenshot 2026-01-12 at 18.05.23.png>"load_data_from_json method, which takes in a path to a json file and returns the data retrieved.")
@@ -209,11 +207,71 @@ Because province membership is determined by an explicit, deterministic point-in
 #### Key Modules and Techniques
 I chose to use the shapely library as it handled all of the geometric operations required to use a point-in-polygon approach. Transforming coordinates to Point objects and converting each province to a Polygon was extremely simple, allowing me to focus on the overall logic of the function rather than the low-level geographical operations.
 
+### Final Visualisation
+#### Language Map
+The first visualisation I created displays all of the languages from the DataFrame on the map as Circles, with the colour corresponding to the number of speakers.  To improve accessibility, a key shows each colour next to its corresponding speaker number range.Clusters reduce noise and offer visual cues indicating language density, improving readability. This visualisation offers insight into the distribution of languages across Papua New Guinea, allowing the user to identify language hotspots and cold zones. The visualisation allows the user to explore the details of each language in a geographical context, something that no other dashboard or visualisation is capable of. 
+
+*add_points_to_cluster* in *Visualiser* is responsible for adding the languages in the DataFrame that fit the condition set by the user to a cluster which is then added to a map. *add_points_to_cluster* calls *assign_colour_based_on_speaker_number* which returns the colour the point should be depending on what range it falls in. The colour scale is designed to be intuitive, leveraging natural perceptual associations, with dark red representing extinct languages and green indicating languages with large speaker populations. To provide further clarification, I created a key, which I wrote in HTML and saved as the class variable *LEGEND_HTML*. To add the legend to the map I used:
+
+`map.get_root().html.add_child(Element(self.LEGEND_HTML))`
+which is located in the *display_filtered_map_ method.
+`map.get_root()` accesses the map’s HTML structure, and `add_child(Element(self.LEGEND_HTML))` wraps the legend’s raw HTML as a Folium-compatible element and inserts it into the map.
+
+Finally, to reduce noise on the map I implemented clusters. Cluster circles change in size and colour based on the number of children they have in an intuitive way, with large, red clusters having the most and small, yellow ones having the least. To make the size of clusters change continuously, I set the cluster radius to `size = 20 + Math.log(count) * 15`. In this way, cluster circle size is more representative of the number of children, making cluster size a more meaningful cue to the user. The function that determines the colour and size of a cluster is written in HTML and assigned to the class variable *ICON_CREATE_FUNCTION*. It is parsed as a parameter when a new cluster in instantiated in *display_filtered_map*.
+
+
+
+#### Choropleth Map
+
+For my second visualisation, I wanted to investigate the relationship between a given linguistic variable over political boundaries. I created a Folium.Chloropleth object, parsing the following parameters:  
+- the dataset containing provincial boundaries (*boundaries_data*), 
+- the DataFrame containing each Province and the number of languages spoken (*language_mapping*),
+- a legend name,
+- the columns in the DataFrame corresponding to the province and the  number of languages spoken there ('Province' and 'Number of Languages'),
+- and the key in the boundaries dataset that contains the geographic boundaries('features.properties.shapeName'). 
+This choropleth visualises the number of languages spoken per province. It links province geometries *geo_data* with frequency data *frequency_data* to colour each region according to its language count. The resulting map highlights regional patterns clearly, includes a legend for accessibility, and uses reproducible, documented Folium functionality. The method is shown below.
+
+#### Bar Chart
+Finally, I wanted to create a visualisation that would enable users to visually and numerically compare the speaker counts of all languages. I chose to display this data through a bar chart created with the Vega-Altair library, as bar length effectively conveys both the absolute number of speakers and the relative size of speaker populations across languages. 
+
+The values in the *plotting_data* column are used as frequency values. I chose to place languages on the Y axis and number of speakers on the x axis as it means the user can continue to scroll downwards through the dashboard as they have been doing for the other visualisations, improving accessibility. Using a logarithmic scale allows languages with widely varying speaker numbers to be compared meaningfully- pattersn across languages become immediately visible. Extinct languages are highlighted in red to draw attention to them and remain consistent with the colour scheme used in the other visualisations. The benefit of setting the *plotting_data* value of extinct and dormant languages to 0 is evident: the bars can actually be seen.
+
+why altair- compatible with df, declarative- focus on what rather than how, interactive capabilities
+
+#### Key Modules and Techniques
+I chose Folium for its versatile marker options, including circles, markers, and circle markers, which facilitated clear plotting of points on the map. Creating points and clusters was straightforward and fully reproducible. Additionally, the ability to convert raw HTML into Folium elements enabled customisation of the map to effectively display the data. Finally, Folium integrates seamlessly with Streamlit, meaning I could embed a Folium.Map object into Streamlit without any conversion.
+
+I chose Altair to create the bar chart because it works seamlessly with DataFrames, allowing direct mapping of columns to visual elements and it supports built-in interactivity, such as tooltips and conditional formatting. Its declarative syntax focuses on what to display rather than how to draw it, which improves efficiency for simple graphs though it meant I had less control over the design. A more eye-catching visualisation could have been made using Plotly.
+
 
 ## Design and Implementation (30%) 
 
 You should show how you constructed the dashboard, demonstrating both the visual and code design. A dashboard implies either interactivity or up-to-date data; ideally, you should include both. This means your dashboard should be interactive and responsive, accommodating different types of users. It should also be updatable, should new data be available. Version control should be used to track the development of new features against documented requirements. You should show knowledge of the classes and methods of libraries used, extending functionality where appropriate.
-Bring attention to lesser spoken languages by colouring them in red. 
+I displayed my visualisations using the Streamlit framework. 
+
+### Interactivity
+I have implemented interactivity into this dashboard in four ways.
+#### 1. Tooltips
+Each of the visualisations on the dashboard is equipped with a tooltip.
+In the Languages Map, when the user hovers over a Circle marking a language, a small window appears with information about the language name, speaker number, speaker number type (eg. exact, range, estimate), source
+#### 2. Popups
+#### 3. Search Languages
+#### 4. Filtration
+### UX Considerations
+#### 1. Help
+#### 2. Filtration Logarithmic Scale
+### Structure
+### Updating Ease
+### Version Control
+
+
+
+Interactivity: tooltips, search function, filtering function, clickable clusters
+Structure: OOP
+How easy is it to update
+Improved user experience: logarithmic filtering scale
+Regular commits, descriptive commit messages, commit after each method
+
 ## Recommendation, Reflection and Conclusions (10%) 
 While this part alone is worth the least number of marks, this is critical for showing the learning that occurred during your work on the assignment, and effective completion of this section will allow you to get more marks in earlier sections. You should link your work to relevant knowledge, skills and behaviour from the apprenticeship, and ensure the marker has everything they need to use and evaluate your code.
 

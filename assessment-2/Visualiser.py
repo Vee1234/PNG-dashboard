@@ -241,15 +241,15 @@ class Visualiser:
         elif vitality_status == 'extinct' or vitality_status == 'dormant':
             return "black"
         elif speaker_number < 100: 
-            return "green"
+            return "darkred"
         elif 100 <= speaker_number < 1000: 
-            return "yellow"
+            return "red"
         elif 1000 <= speaker_number < 10000:
             return "orange"
         elif 10000<= speaker_number < 100000:
-            return "red"
+            return "yellow"
         else:
-            return "darkred"
+            return "green"
 
     def add_points_to_cluster(self, df: pd.DataFrame, cluster) -> folium.Map:
         for idx, row in df.iterrows():
