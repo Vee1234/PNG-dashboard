@@ -4,10 +4,12 @@ from dataclasses import asdict
 from bs4 import BeautifulSoup
 import requests
 import hashlib
+import csv
 from pathlib import Path
 import time
 from Result import Result
 from requests.exceptions import ReadTimeout, RequestException
+from LanguageEntry import LanguageEntry
 class DataLoader:
     def __init__(self):
         self.HEADERS =  {
@@ -30,9 +32,15 @@ class DataLoader:
         df = pd.read_csv(data_address)
         return df
     
-    def add_new_row_to_dataframe(self, df: pd.DataFrame, new_row: dict) -> pd.DataFrame:
+    def add_new_row_to_csv_file(self, entry: LanguageEntry, file_path: str) -> pd.DataFrame:
         '''Adds a new row to the DataFrame and writes the updated DataFrame to a CSV file.'''
-        new_row_df = pd.DataFrame([new_row])
+        entry = asdict(entry)
+        with open(file_path, mode='a', newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=entry.keys())
+        
+        # Write the new row
+        writer.writerow(entry)
+
         updated_df = pd.concat([df, new_row_df], ignore_index=True)
         self.write_df_to_csv(updated_df, 'data/language_speaker_data.csv')
         return updated_df
