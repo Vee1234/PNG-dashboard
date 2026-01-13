@@ -23,10 +23,7 @@ def main():
     # df = processor.rename_columns(df, columns_mapping)
     # selected_columns = ['language_ID', 'language', 'latitude', 'longitude', 'links']
     # df = processor.create_new_dataframe_with_selected_columns(df, selected_columns)
-    # df = processor.remove_data(df, 'language', 'Bilua')
-    # df = processor.remove_data(df, 'language', 'Touo')
-    # df = processor.replace_expression_in_values_in_column(df,'language', ' (Papua New Guinea)')
-    # df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
+    df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
    
     # final_df, languages_without_speaker_number = data_loader.orchestrate_data_scraping_per_domain_name(
     #     df, 

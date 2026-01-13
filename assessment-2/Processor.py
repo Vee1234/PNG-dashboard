@@ -49,10 +49,10 @@ class Processor:
         )
         return df
     
-    def replace_url_in_values_in_column(self, df: pd.DataFrame, expression: str, to_be_replaced: str = '') -> pd.DataFrame:
+    def replace_url_in_values_in_column(self, df: pd.DataFrame, expression: str, replacement: str = '') -> pd.DataFrame:
         for link_list in df['links']:
             for link in link_list:              
-                link['url'] = link['url'].replace(expression, to_be_replaced)
+                link['url'] = link['url'].replace(expression, replacement)
         return df           
 
     def replace_expression_in_values_in_column(self, df: pd.DataFrame, column, expression: str, to_be_replaced: str = '') -> pd.DataFrame:

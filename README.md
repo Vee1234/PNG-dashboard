@@ -44,9 +44,31 @@ Provenance analysis aided me to determine which resources were most suitable for
 | **Wikipedia**                            | Speaker numbers and vitality status (fallback cases)                               | Community-curated tertiary source with low academic credibility.                                                                                                    | Aggregates information from secondary sources, often Ethnologue, without guaranteed traceability.                                                             | Update frequency is inconsistent.                  | High uncertainty due to indirect sourcing and lack of verification; error may propagate from upstream sources, resulting in an incorrect speaker number value. | Used only when no other data were available, improving completeness at the cost of increased uncertainty.                                              | Freely accessible; ethical use requires explicit acknowledgment of limitations. |
 | **APiCS**                                | Speaker numbers for pidgin and creole languages                                    | Edited by academic linguists and supported by major research institutions.                                                                                          | Demographic and linguistic data compiled by domain experts; originally published as a peer-reviewed volume.                                                   | Continuously maintained.                           | Limited to pidgin and creole languages; not representative of all language types.                              | Provides reliable, expert-approved speaker estimates for a specific language class.                                                                    | Freely accessible and suitable for scholarly use.                               |
 
-## Data Scraping 
-As Ethnologue datasets are located behind a paywall, I decided to scrape the datasets from urls provided. 
-![alt text](<images/Screenshot 2026-01-12 at 18.05.23.png>)
+## Code Structure
+In this project, I  decided to apply OOP principles and abstract methods into single-responsibility classes. 
+## Initial Data Cleaning 
+The first resource I required was a comprehensive list of languages with their respective coordinates. I obtained this from GeoJSON which I copied from the Glottolog website. I retrieved the data using the *load_data_from_json* function in the *DataLoader* class shown below:
+![alt text](<images/Screenshot 2026-01-12 at 18.05.23.png>"load_data_from_json method, which takes in a path to a json file and returns the data retrieved.")
+and converted the data from GeoJSON into a Pandas DataFrame called language_location_data using the *convert_json_to_df* function in *Processor*:
+![alt text](<images/Screenshot 2026-01-12 at 18.22.26.png>)
+I decided to store the data in a Pandas DataFrame as it make the data cleaning, analysis and visualisation processes so much more efficient. It is easy to perform joins between DataFrames, perform statistical operations by row and column and DataFrames are compatible with many visualisation libraries. 
+
+To reduce redundancy, I identified which columns would be the most relevant to this project. As well as language, latitude and longitude, I kept the Glottolog 'language_ID' (which could act as a primary key, given a single language could have multiple names) and the source 'links' column;  Ethnologue datasets are located behind a paywall so data scraping would be necessary to retrieve speaker number data and vitality status. These links would be verified by the academics at Glottolog, increasing the credibility of the data from these websites.
+I renamed these columns to improve readability and simplify referencing.  I did this by creating a dictionary called 'columns_mapping' which links the previous column name to a new one, and then calling the *rename_columns* function in *Processor*. 
+![alt text](<images/Screenshot 2026-01-12 at 18.50.33 1.png>)
+
+![alt text](<images/Screenshot 2026-01-12 at 19.17.40.png> "The rename_columns method takes a DataFrame and a columns mapping as arguments and returns the dataframe with modified column names." )
+
+Following that, I created a list of the relevant columns and created a new DataFrame with only these columns using the *create_new_dataframe_with_selected_columns* I built in *Processor*. 
+
+In preparation for data scraping, I tested a few of the links in  *language_location_data* to verify that they could  be accessed. When I navigated to any of the links to the Endangered Languages Project site, a 404 error occured. I discovered that URL schema changed from using the path /lang/<language-name> to /elp-language/<language-name>, replacing the original endpoint structure while retaining the language identifier as the terminal path segment. I wrote the *replace_url_in_values_in_column* method to rectify this.
+ "the replace_url_in_values_in_column method loops through each link in each row of 'links' columns, replacing an expression with another. The replacement expression defaults to '', in which case the expression will simply be removed." )
+![alt text](<images/Screenshot 2026-01-12 at 19.47.03.png>)
+ ## Data Scraping
+
+
+
+
 ## Methodology and Data Analysis (30%) 
 You should talk about and demonstrate your analysis methods and approaches to visualisation here. While the quality of data available will depend on your project, you should be able to demonstrate statistics at the level of collections and subcollections. You should consider what types of visualisations will best convey your insights, and how these will be accessible to your audience. You should also ensure your work is reproducible and that algorithms or formulas used for calculations are documented. 
 ## Design and Implementation (30%) 
