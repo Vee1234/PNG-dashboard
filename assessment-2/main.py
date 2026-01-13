@@ -23,7 +23,7 @@ def main():
     # df = processor.rename_columns(df, columns_mapping)
     # selected_columns = ['language_ID', 'language', 'latitude', 'longitude', 'links']
     # df = processor.create_new_dataframe_with_selected_columns(df, selected_columns)
-    df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
+    #df = processor.replace_url_in_values_in_column(df, 'https://endangeredlanguages.com/lang/', 'https://www.endangeredlanguages.com/elp-language/')
    
     # final_df, languages_without_speaker_number = data_loader.orchestrate_data_scraping_per_domain_name(
     #     df, 
@@ -75,7 +75,7 @@ def main():
     #language_speaker_data = processor.create_plotting_data_column(language_speaker_data)
 
     #language_speaker_data = processor.create_tooltip_column_for_barchart(language_speaker_data)
-    data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
+    #data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
     
     
     
