@@ -3,10 +3,12 @@ from shapely.geometry import Point, shape
 
 class Analyser:
     def __init__(self):
-        self.SOURCE_CONFIDENCE_DICT = {'source_category': {'primary': 1, 'secondary': 0.75, 'tertiary': 0.5}, 
-                                      'source_type': {'expert-curated': 1, 'community-curated': 0.75}, 
-                                      'speaker_number_type': {'exact': 1, 'estimate': 0.75, 'range': 0.5, 'qualitative estimate': 0.25, 'qualitative range': 0.25},
-                                      'access_route': {'direct': 1, 'indirect': 0.5} }
+        self.SOURCE_CONFIDENCE_MAX = 1
+        self.SOURCE_CONFIDENCE_MULTIPLIER = 0.75
+        self.SOURCE_CONFIDENCE_DICT = {'source_category': {'primary': self.SOURCE_CONFIDENCE_MAX, 'secondary': self.SOURCE_CONFIDENCE_MAX*self.SOURCE_CONFIDENCE_MULTIPLIER, 'tertiary': self.SOURCE_CONFIDENCE_MAX*(self.SOURCE_CONFIDENCE_MULTIPLIER)**2}, 
+                                      'source_type': {'expert-curated': self.SOURCE_CONFIDENCE_MAX, 'community-curated': self.SOURCE_CONFIDENCE_MAX*self.SOURCE_CONFIDENCE_MULTIPLIER}, 
+                                      'speaker_number_type': {'exact':self.SOURCE_CONFIDENCE_MAX, 'estimate': self.SOURCE_CONFIDENCE_MAX*self.SOURCE_CONFIDENCE_MULTIPLIER, 'range': self.SOURCE_CONFIDENCE_MAX*(self.SOURCE_CONFIDENCE_MULTIPLIER)**2, 'qualitative estimate': self.SOURCE_CONFIDENCE_MAX*(self.SOURCE_CONFIDENCE_MULTIPLIER)**3, 'qualitative range': self.SOURCE_CONFIDENCE_MAX*(self.SOURCE_CONFIDENCE_MULTIPLIER)**4},
+                                      'access_route': {'direct': self.SOURCE_CONFIDENCE_MAX, 'indirect':self.SOURCE_CONFIDENCE_MAX*self.SOURCE_CONFIDENCE_MULTIPLIER } }
         
     def find_midpoint_coordinates(self, df: pd.DataFrame) -> tuple:
         '''This function calculates the midpoint of the latitude and longitude from the dataframe.'''
@@ -31,7 +33,7 @@ class Analyser:
             row["source_confidence"] = None
         return row
     
-    def calculate_min_and_max_for_not_ranges(self, row):
+    def calculate_min_and_max_for_all_except_range(self, row):
         '''-Calculates min and max speaker numbers for non-range types.
         - If vitality status is extinct or dormant, sets min and max to 0.
         -Estimates min and max bounds for estimates and qualitative estimates using source confidence.
@@ -61,7 +63,7 @@ class Analyser:
         df = pd.DataFrame(columns=['Province', 'Number of Languages', 'Languages List'])
         for feature in boundaries_data['features']:
                 polygon = shape(feature['geometry'])
-                for index, row in language_df.iterrows():
+                for _, row in language_df.iterrows():
                     language = row['language']
                     longitude = row['longitude']
                     latitude = row['latitude']
@@ -85,7 +87,7 @@ class Analyser:
     def create_plotting_data_column(self, df: pd.DataFrame) -> pd.DataFrame:
         '''Creates a plotting data column for the dataframe. 
         Used for visualisations where a single numerical value is required for each language, e.g., bar charts'''
-        df = df.apply(self.calculate_min_and_max_for_not_ranges, axis=1)
+        df = df.apply(self.calculate_min_and_max_for_all_except_range, axis=1)
         df["plotting_data"] = None 
         df["speaker_number_min"] = pd.to_numeric(df["speaker_number_min"], errors="coerce")
         df["speaker_number_max"] = pd.to_numeric(df["speaker_number_max"], errors="coerce")

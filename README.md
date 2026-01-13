@@ -43,7 +43,7 @@ and converted the data from GeoJSON into a Pandas DataFrame called language_loca
 ![alt text](<assets/Screenshot 2026-01-12 at 18.22.26.png>)
 I decided to store the data in a Pandas DataFrame as it make the data cleaning, analysis and visualisation processes so much more efficient. It is easy to perform joins between DataFrames, perform statistical operations by row and column and DataFrames are compatible with many visualisation libraries. 
 
-To reduce redundancy, I identified which columns would be the most relevant to this project. As well as language, latitude and longitude, I kept the Glottolog 'language_ID' (which could act as a primary key, given a single language could have multiple names) and the source 'links' column;  Ethnologue datasets are located behind a paywall so data scraping would be necessary to retrieve speaker number data and vitality status. These links would be verified by the academics at Glottolog, increasing the credibility of the data from these websites.
+To reduce redundancy, I identified which columns would be the most relevant to this project. As well as language, latitude and longitude, I kept the Glottolog 'language_ID' (which could act as a primary key, given a single language could have multiple names) and the source 'links' column;  Ethnologue datasets are located behind a paywall so data scraping would be necessary to retrieve speaker number data and vitality status. These links are verified by the academics at Glottolog, increasing the credibility of the data from these websites.
 I renamed these columns to improve readability and simplify referencing.  I did this by creating a dictionary called 'columns_mapping' which links the previous column name to a new one, and then calling the *rename_columns* function in *Processor*. 
 ![alt text](<assets/Screenshot 2026-01-12 at 18.50.33 1.png>)
 
@@ -135,13 +135,13 @@ I created exploratory visualisations to guide analysis decisions, prioritising u
 I used the Folium library to create maps. In *Visualiser*, I built the *create_map* method which returns a Folium.Map object with an associated header and description. I extracted language_speaker_data from *language_speaker_data_clean.csv* and looped through the coordinates, adding each language as a point to the map. To display maps, Folium map HTML must be saved to a file and then read. To avoid repetitive code, I wrote the *display_map* method which accomplishes this.
 
 I used Streamlit to build and display my web app. As I navigated this elementary visualisation, I considered a few ideas that would improve the value and credibility of the dashboard:
-1. Adjusting the initial map coordinates to centre on Papua New Guinea
-2. Adding a tooltip to improve interactivity and readibility
-3. Calculation of source confidence and application to filtration functions to reflect uncertainty in values
+1. Adjusting the initial map coordinates to centre on Papua New Guinea;
+2. Adding a tooltip to improve interactivity and readibility;
+3. Calculation of source confidence and to reflect uncertainty in values, which can be applied to filtration functions.
 
-This exploration helped me decided which geographic and numerical visualisations I wished to display. Below is a list that I believe would bring value to my dashboard.
+This exploration helped me decided which data I wished to display and the visualisation I could use. Below is a list that I believe would bring value to my dashboard.
 1. A map displaying each language as a point equipped with a tooltip feature, filtration and search capabilities. This would allow the user to explore the individual languages speaker numbers and locations and identify language hotspots.
-2. A choropleth map displaying languages per administrative region. This would enable users to explore how the historically borderless linguistic landscape of Papua New Guinea is constrained by contemporary political boundaries.
+2. A choropleth map displaying languages per administrative region. This would enable users to explore how the historically borderless linguistic landscape of Papua New Guinea fit into the country's modern-day political boundaries.
 3. A bar chart displaying the number of speakers per language. This allows the user to directly compare the speaker numbers of all languages, at a macro level.
 
 ### Analysis
@@ -171,27 +171,49 @@ The function determines which value to display in the tooltip using the followin
 | Range, Estimate, Qualitative Range, Qualitative Estimate | Uses the raw speaker number (`speaker_number_raw`) |
 | Exact                                  | Uses the numeric speaker count (`speaker_number_numeric`) |
 | Extinct, Dormant                        | Uses the vitality status (`vitality_status`)    |
-
+#### Key Modules and Techniques Used
+I used the Pandas module to set the initial value of the columns to NaN.
 ### Calculating Source Confidence
-The factors that
+
+Displaying source confidence is essential. It helps to inform the user's interpretation snf maintain transparency about the limitations of the dataset and the credibility of the underlying data.
+
+The factors affecting the confidence of each source (access type, source category and source type) were recorded and stored in appropriate columns in the *language_speaker_data* DataFrame during data scraping. I created a dictionary wherein each descriptor was assigned a numerical multiplier, shown below.
+
+Estimates are considered more credible than ranges and qualitative descriptions are heavily penalised. I assumed that confidence decreases through SOURCE_CONFIDENCE_DICTIONARY, with each level reducing the numerical score by 0.25. 
+
+This is the formula I used to calculate source confidence, which I implemented in the *create_source_confidence* method:
+```(T)*(C)*(N)*(A)```
+where T, C, N and A are the confidences associated with source type, source category, speaker number type and access route respectively. 
+
+### Applying Source Confidence to Filtration
+
+Speaker numbers are inherently uncertain due to survey limitations; even for estimated counts, the true value is assumed to lie within a range surrounding the reported figure. Determining these bounds is essential to avoid misrepresenting speaker numbers when filtering by population. For example, if the map is filtered to show languages with more than 2,900 speakers, Manambu should be included, as its true speaker count is assumed to lie within a range around the reported raw value (~2,800). The size of the range is directly influenced by source confidence.
+
+I created the *calculate_min_and_max_for_not_ranges* to calculate the upper and lower bounds and parse them into speaker_number_min and speaker_number_max.
+
+
+Both bounds are set to 0 for extinct and dormant languages to separate them from the rest of the data which makes the process to access these languages more intuitive for the user.
+Considering these bounds results in a more accurate filtering system.
+
+### Mapping Languages to Province using shapely
+A key insight derivable from the dataset is the distribution of languages across provinces. A choropleth map with a legend most effectively conveys this pattern, as the colour shading means relative language density is immediately apparent to the user. 
+
+The GeoJSON file containing Papua New Guinea's provincial boundaries was downloaded from geoBoundaries.org. In the *build_province_language_mapping* method below, the contents of the GeoJSON were parsed as a parameter to boundaries_data while language_speaker_data was parsed to language_df.
+(build_province_language_mapping)
 
 
 
+This function demonstrates a clear analysis method by gathering point-level language data into province-level collections and subcollections using a point-in-polygon approach.
+Because province membership is determined by an explicit, deterministic point-in-polygon rule, the collection process is fully reproducible: identical inputs will always yield the same province-level language counts, allowing the analysis to be independently replicated.
 
+#### Key Modules and Techniques
+I chose to use the shapely library as it handled all of the geometric operations required to use a point-in-polygon approach. Transforming coordinates to Point objects and converting each province to a Polygon was extremely simple, allowing me to focus on the overall logic of the function rather than the low-level geographical operations.
 
-
-
-
-
-
-
-3. calculating source confidence
-4. Calculate min and max for the non ranges using source confidence- for filtering function
-5. Determining whether a point lay in the polygon or not
-Bring attention to lesser spoken languages by colouring them in red.
 
 ## Design and Implementation (30%) 
-You should show how you constructed the dashboard, demonstrating both the visual and code design. A dashboard implies either interactivity or up-to-date data; ideally, you should include both. This means your dashboard should be interactive and responsive, accommodating different types of users. It should also be updatable, should new data be available. Version control should be used to track the development of new features against documented requirements. You should show knowledge of the classes and methods of libraries used, extending functionality where appropriate. 
+
+You should show how you constructed the dashboard, demonstrating both the visual and code design. A dashboard implies either interactivity or up-to-date data; ideally, you should include both. This means your dashboard should be interactive and responsive, accommodating different types of users. It should also be updatable, should new data be available. Version control should be used to track the development of new features against documented requirements. You should show knowledge of the classes and methods of libraries used, extending functionality where appropriate.
+Bring attention to lesser spoken languages by colouring them in red. 
 ## Recommendation, Reflection and Conclusions (10%) 
 While this part alone is worth the least number of marks, this is critical for showing the learning that occurred during your work on the assignment, and effective completion of this section will allow you to get more marks in earlier sections. You should link your work to relevant knowledge, skills and behaviour from the apprenticeship, and ensure the marker has everything they need to use and evaluate your code.
 

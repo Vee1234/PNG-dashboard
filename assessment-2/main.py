@@ -71,17 +71,18 @@ def main():
 
     #language_speaker_data = analyser.create_tooltip_column_for_barchart(language_speaker_data)
     #data_loader.write_df_to_csv(language_speaker_data, 'assessment-2/data/language_speaker_data_clean.csv')
-    
-
-    visualiser.show_title("Language Speaker Data Visualisation for Papua New Guinea")
     boundaries_data = data_loader.load_data_from_json('assessment-2/data/geoBoundaries-PNG-ADM1.geojson')
+    df = analyser.build_province_language_mapping(boundaries_data, language_speaker_data)
+    data_loader.write_df_to_csv(df, 'assessment-2/data/province_language_mapping.csv')
+
+    language_mapping = data_loader.load_data_from_csv('assessment-2/data/province_language_mapping.csv')
+    visualiser.show_title("Language Speaker Data Visualisation for Papua New Guinea")
     filter_map = visualiser.create_map("Geographical Speaker Distribution", "Hover over each point to learn more about the language.", language_speaker_data)
     visualiser.display_filtered_map(language_speaker_data, filter_map)
     visualiser.search_for_language(language_speaker_data, filter_map)
     filtered_df = visualiser.display_map(filter_map, 'filtered_language_map.html')
     choropleth_map = visualiser.create_map("Number of Languages Spoken by Province", "Hover over each province to see how many languages are spoken there.", language_speaker_data)
-    df = analyser.build_province_language_mapping(boundaries_data, language_speaker_data)
-    visualiser.create_choropleth(boundaries_data, df, choropleth_map)
+    visualiser.create_choropleth(boundaries_data, language_mapping, choropleth_map)
     visualiser.display_map(choropleth_map,'choropleth_map.html')
     visualiser.show_logarithmic_bar_graph(language_speaker_data)
 
