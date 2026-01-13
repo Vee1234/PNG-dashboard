@@ -55,7 +55,7 @@ class Visualiser:
         <span style="display:inline-block;
                     width:14px;
                     height:14px;
-                    background-color:green;
+                    background-color:darkred;
                     border-radius:50%;
                     margin-right:6px;"></span>
         Very Low (<100)<br>
@@ -63,7 +63,7 @@ class Visualiser:
         <span style="display:inline-block;
                     width:14px;
                     height:14px;
-                    background-color:yellow;
+                    background-color:red;
                     border-radius:50%;
                     margin-right:6px;"></span>
         Low (100-999)<br>
@@ -79,7 +79,7 @@ class Visualiser:
         <span style="display:inline-block;
                     width:14px;
                     height:14px;
-                    background-color:red;
+                    background-color: yellow;
                     border-radius:50%;
                     margin-right:6px;"></span>
         High (10,000-99,999)<br>
@@ -87,7 +87,7 @@ class Visualiser:
         <span style="display:inline-block;
                     width:14px;
                     height:14px;
-                    background-color:darkred;
+                    background-color:green;
                     border-radius:50%;
                     margin-right:6px;"></span>
         Very High (>= 100,00)<br>
